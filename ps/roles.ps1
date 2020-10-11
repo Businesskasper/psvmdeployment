@@ -204,8 +204,6 @@ $NodeRoles.BC = [NodeRole]@{
 
     Name = "BC"
 
-    Applications = @($Applications.Newsystem)
-
     DscModules = @(
         
         [DscModule]@{
