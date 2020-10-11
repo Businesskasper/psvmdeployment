@@ -11,10 +11,10 @@
     Author               = 'Luka Weis'
 
     # Unternehmen oder Hersteller dieses Moduls
-    CompanyName          = 'Axians Infoma GmbH'
+    CompanyName          = ''
 
     # Urheberrechtserklärung für dieses Modul
-    Copyright            = '(c) 2018 Axians Infoma. Alle Rechte vorbehalten.'
+    Copyright            = ''
 
     # Beschreibung der von diesem Modul bereitgestellten Funktionen
     Description          = 'Erstellt, signiert und installiert Zertifikate'
