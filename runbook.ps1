@@ -13,10 +13,11 @@
     Import-DscResource -ModuleName xActiveDirectory -ModuleVersion 2.22.0.0
     Import-DscResource -ModuleName xNodeJS -ModuleVersion 1.0
 
-    #Settings für alle Nodes
+
+    # Settings for all nodes
     Node $AllNodes.NodeName {
         
-        #DSC Analytic Log aktivieren
+        # Enable DSC analytic log
         xWinEventLog DSCAnalyticLog {
 
             LogName = 'Microsoft-Windows-Dsc/Analytic'
@@ -25,7 +26,7 @@
         }
 
 
-        #Netzwerkkonfiguration
+        # Network configuration
         foreach ($nic in $node.NICS | ? {$_.IPAddress}) {
 
             xVmNetConfig $nic.SwitchName {
@@ -47,7 +48,7 @@
         }
   
    
-        #Firewall deaktivieren
+        # Disable firewall
         xFirewallProfile Private {
 
             Name    = 'Private'
@@ -68,7 +69,7 @@
         
         if ($node.DomainName -and $node.Roles -notcontains $NodeRoles.DC -and $node.JoinDomain) {
 
-            #Domain join wenn Domäne erreichbar
+            # Wait for the domain to become ready to join
             xWaitForADDomain WaitForDomain {
 
                 DomainName           = $node.DomainName
@@ -96,7 +97,7 @@
     }   
 
     
-    #Settings für alle Nodes mit Rolle "DC"
+    # Settings for all nodes with role DC
     Node $AllNodes.Where( { $_.Roles -contains $NodeRoles.DC } ).NodeName {
 
         #Rollen DNS, DHCP und ADDS installieren
@@ -161,6 +162,7 @@
 
         
         Script RebootDomain {
+
             TestScript = {
 
                 return (Test-Path HKLM:\SOFTWARE\DSC\RebootDomain)
@@ -181,6 +183,7 @@
     }
     
 
+    # Settings for all nodes with role "SQL"
     Node $AllNodes.Where({ $_.Roles -contains $NodeRoles.SQL }).NodeName {
 
         SqlSetup SQL2019 {
@@ -231,7 +234,8 @@
             }
         }
 
-        Script RebootSQL{
+        Script RebootSQL {
+
             TestScript = {
 
                 return (Test-Path HKLM:\SOFTWARE\DSC\RebootSQL)
@@ -252,6 +256,7 @@
     } 
 
     
+    # Settings for all nodes with role "BC"
     Node $AllNodes.Where({ $_.Roles -contains $NodeRoles.BC }).NodeName {
     
         Script RestoreBCDB {
@@ -259,32 +264,38 @@
             DependsOn             = '[ServiceSet]SQLService'
             PsDscRunAsCredential = if ($node.DomainCredentials -ne $null) { $node.DomainCredentials } else { $node.LocalCredentials }
             GetScript            = {
+
                 $env:PSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath', 'Machine')
                 $module = (Get-Module -FullyQualifiedName 'SqlServer' -ListAvailable | ? {$_.Version -eq "21.1.18068"}).Name
                 $null = Import-Module $module -DisableNameChecking
                 Return @{
-                    Result = Get-SqlDatabase -ServerInstance "LOCALHOST\SQL2019" -Name "ByBawue_Migration" -ea 0
+
+                    Result = Get-SqlDatabase -ServerInstance "LOCALHOST\SQL2019" -Name "BCDB" -ea 0
                 }
             }
             TestScript           = {
+
                 $env:PSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath', 'Machine')
                 $module = (Get-Module -FullyQualifiedName 'SqlServer' -ListAvailable | ? {$_.Version -eq "21.1.18068"}).Name
                 $null = Import-Module $module -DisableNameChecking
 
-                if (Get-SqlDatabase -ServerInstance "LOCALHOST\SQL2019" -Name "ByBawue_Migration" -ea 0) {
+                if (Get-SqlDatabase -ServerInstance "LOCALHOST\SQL2019" -Name "BCDB" -ea 0) {
+
                     return $true
                 }
                 else {
+
                     return $false
                 }
             }
             SetScript            = {
+
                 $env:PSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath', 'Machine')
                 $module = (Get-Module -FullyQualifiedName 'SqlServer' -ListAvailable | ? {$_.Version -eq "21.1.18068"}).Name
                 $null = Import-Module $module -DisableNameChecking
 
 
-                Restore-SqlDatabase -BackupFile "C:\SQL\Backup\BC_190100000_ByBawue_A_NoUsers.bak" -Database "ByBawue_Migration" -ServerInstance "LOCALHOST\SQL2019" 
+                Restore-SqlDatabase -BackupFile "C:\SQL\Backup\BCDB.bak" -Database "BCDB" -ServerInstance "LOCALHOST\SQL2019" 
             }
         }
 
@@ -298,8 +309,8 @@
                 ServiceAccount = $node.LocalCredentials
                 DatabaseServer = "localhost"
                 DatabaseInstance = "SQL2019"
-                DatabaseName = "ByBawue_Migration"
-                InstanceName = "ByBawue_Migration"
+                DatabaseName = "BCDB"
+                InstanceName = "BCDB"
                 ManagementServicesPort = 13045
                 ClientServicesPort = 13046
                 DataServicesPort = 13048
@@ -313,23 +324,12 @@
         
             
         }
-            
-
-        xInstallExe newsystem {
-            
-            Ensure     = 'Present'
-            AppName    = 'Infoma newsystem 19.2.0.0'
-            Arguments  = @('/i', 'C:\Sources\Software\Infoma_Newsystem\19.2.0.0\Infoma newsystem.msi', '/q')
-            BinaryPath = 'C:\windows\system32\msiexec.exe'
-            ExitCodes  = @(0)
-            TestPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{1FCA1B9B-6EE1-477A-8B07-CDD0520686A9}'                                    
-        }
     }
 
 
+    # Settings for all nodes with role "DEV"
     Node $AllNodes.Where({ $_.Roles -contains $NodeRoles.DEV -and $_.OSType -eq "Standard" }).NodeName {
     
-    <#
         xInstallExe VS_2019_Professional {
 
             Ensure     = 'Present'
@@ -342,7 +342,7 @@
                 Exe       = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\IDE\devenv.exe"
             }
         }
-    #>
+
         xInstallExe VSCode {
 
             Ensure     = 'Present'
@@ -356,35 +356,6 @@
             }
         }
 
-    <#
-        xInstallExe BeyondCompare {
-
-            Ensure     = 'Present'
-            AppName    = 'Beyond Compare 4'
-            Arguments  = @('/i', 'C:\Sources\Software\BeyondCompare\BCompare-4.2.4.22795_x64.msi', '/q')
-            BinaryPath = 'C:\windows\system32\msiexec.exe'
-            TestPath   = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{382FD58E-226F-418B-8F34-DA8EE89D9550}'
-            ExitCodes  = @(0)
-            Shortcut   = @{
-                Exe       = "C:\Program Files\Beyond Compare 4\BCompare.exe"
-                Parameter = ""
-            }
-        }
-    #>
-        
-        <#
-        #Beyond Compare Lizenz importieren
-        File BeyondCompareLicense {
-            Ensure = 'Present'
-            Type = 'File'
-            SourcePath = 'C:\sources\DevClient\BeyondCompare\BC4Key.txt'
-            DestinationPath = 'C:\Program Files\Beyond Compare 4\BC4Key.txt'
-            Force = $true
-            DependsOn = '[xInstallExe]BeyondCompare'
-        }
-        #>
-
-
         if ($node.NodeVersion -ne $null) {
 
             xNodeJS NodeJS {
@@ -396,6 +367,7 @@
     }
 
 
+    # Install any explicitly added applications
     Node $AllNodes.Where({ $_.Applications -ne $null -and $_.Applications.Count -ne 0 }).NodeName {
 
         $node.Applications.foreach({

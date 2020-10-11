@@ -42,52 +42,46 @@
         [bool]$online
     )
 
+    #
+    # Preparation
+    #
 
-    #Hyper-V Modul laden
+    # Load Hyper-V module
     try {
 
-        Write-Host "Lade Hyper-V Modul"
-        Import-Module Hyper-V | Out-Null
+        Import-Module Hyper-V -ErrorAction Stop | Out-Null
     }
     catch {
 
-        Write-Host $_.Exception.Message -ForegroundColor Red
-        $null = Read-Host
-        break
+        Write-Host "Could not load Hyper-V module!" -ForegroundColor Red
+        throw $_.Exception
     }
 
-    #Verbindung testen
+    # Test Hyper-V connection
     try {
 
-        Write-Host "Verbinde mit Hyper-V"
         $vmHost = Get-VMHost
     }
     catch {
 
-        Write-Host $_.Exception.Message -ForegroundColor Red
-        $null = Read-Host
-        break
+        Write-Host "Could not connect to Hyper-V host" -ForegroundColor Red
+        throw $_.Exception
     }
 
-    #.vhdx Verzeichnis anlegen
+    # Create .vhdx directory
     $vmVhdDir = Join-Path -Path $vmHost.VirtualHardDiskPath -ChildPath $vmName
     
-    try {
-
-        Write-Host "Erstelle $($vmVhdDir)"
-        DeleteItem -path $vmVhdDir
-        New-Item -Path $vmVhdDir -ItemType Directory | Out-Null
-    }
-    catch {
-
-        Write-Host $($vmVhdDir + " konnte nicht erstellt werden:") -ForegroundColor Red
-        Write-Host $_.Exception.Message -ForegroundColor Red
-        $null = Read-Host
-        break
-    }
+    Write-Host "Creating $($vmVhdDir)"
+    DeleteItem -path $vmVhdDir
+    New-Item -Path $vmVhdDir -ItemType Directory -ErrorAction Stop | Out-Null
 
 
-    #Antwortdatei generieren
+
+    #
+    # Create VHD
+    #
+
+    # Generate Answerfile
     $answerFile = @"
 <?xml version="1.0"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
@@ -133,38 +127,19 @@
 "@
     
     
-    #Vhdx kopieren
+    # Copy template .vhdx
     $vmVHDPath = [System.IO.Path]::Combine($vmVhdDir, $vmName + ".vhdx")
-    Write-Host "Kopiere $($vhdxFile) nach $($vmVHDPath)"
+    Write-Host "Copying $($vhdxFile) to $($vmVHDPath)"
+    Copy-Item -Path $vhdxFile -Destination $vmVHDPath -Force -ErrorAction Stop | Out-Null
+    
 
-    try {
-
-        Copy-Item -Path $vhdxFile -Destination $vmVHDPath -Force | Out-Null
-    } 
-    catch {
-
-        Write-Host $_.Exception.ToString() -ForegroundColor Red
-        $null = Read-Host
-        break
-    }
-
-
-    #.vhdx größe anpassen
-    Write-Host "Erweitere $($vmVHDPath) auf $($diskSize / 1GB)GB"
-
-    try {
-
-        Resize-VHD -Path $vmVHDPath -SizeBytes $diskSize 
-    } 
-    catch [Exception] {
-
-        Write-Host $_.Exception.ToString() -ForegroundColor Red
-        throw $_
-    }
+    # Resize .vhdx
+    Write-Host "Expanding $($vmVHDPath) to $($diskSize / 1GB)GB"
+    Resize-VHD -Path $vmVHDPath -SizeBytes $diskSize -ErrorAction Stop
         
         
-    #.vhdx Mounten
-    Write-Host "Mounte $($drive.Root) => $($vmVHDPath)"
+    # Mount .vhdx
+    Write-Host "Mounting $($drive.Root) => $($vmVHDPath)"
 
     $before = Get-PSDrive
     Mount-VHD -Path $vmVHDPath
@@ -176,53 +151,40 @@
     }
 
 
-    #Partition erweitern
-    try {
-
-        $maxSize = (Get-PartitionSupportedSize -DriveLetter $($drive.Name)).SizeMax 
-        $maxSizeRounded = [math]::floor($maxSize / 1GB) * 1GB
-        Write-Host "Erweitere $($drive.Root) auf $($maxSizeRounded / 1GB) GB"
-        Resize-Partition -DriveLetter $($drive.Name) -Size $maxSizeRounded 
-    }
-    catch {
-
-        Write-Host $_.Exception.ToString() -ForegroundColor Red
-        throw $_
-    }
+    # Expand partition
+    $maxSize = (Get-PartitionSupportedSize -DriveLetter $($drive.Name)).SizeMax 
+    $maxSizeRounded = [math]::floor($maxSize / 1GB) * 1GB
+    Write-Host "Expanding $($drive.Root) to $($maxSizeRounded / 1GB) GB"
+    Resize-Partition -DriveLetter $($drive.Name) -Size $maxSizeRounded -ErrorAction Stop
 
 
-    #Antwortdatei generieren und in .vhdx kopieren
-    Write-Host "Kopiere Unattended File"
-
+    # Generate Answerfile and copy to .vhdx
+    Write-Host "Copying unattended file"
     New-Item -Path $(Join-Path -Path ($drive.Root) -ChildPath Windows\Panther) -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
     $answerFile | Out-File -FilePath $(Join-Path -Path ($drive.Root) -ChildPath Windows\Panther\Unattend.xml) -Force
         
-
-    #DSC .mof Datei in .vhdx kopieren
+    # Copy DSC .mof file to .vhdx
     $dscFileTarget = Join-Path -Path ($drive.Root) -ChildPath '\Windows\System32\Configuration\Pending.mof'
     if ($dscFile) { 
 
-        Write-Host "Kopiere DSC Konfiguration $($dscFile) nach $($dscFileTarget))"
-        try {
-
-            Copy-Item -Path $dscFile -Destination $dscFileTarget
-        }
-        catch {
-
-            Write-Host = $_.Exception.ToString() -ForegroundColor Red
-            throw $_
-        }
-            
+        Write-Host "Copying DSC configuration $($dscFile) to $($dscFileTarget))"
+        Copy-Item -Path $dscFile -Destination $dscFileTarget -ErrorAction Stop            
     }
 
-    #Module in .vhdx kopieren
-    Write-Host "Kopieren Module"
+
+
+    #
+    # VM Preparation
+    #
+
+    # Copy modules to .vhdx
+    Write-Host "Copying modules"
 
     $psModules | % {
 
         if ($_) {
 
-            Write-Host "Kopiere $([System.IO.Path]::Combine($_.ModuleBase, $_.Name, $_.RequiredVersion)) nach $([System.IO.Path]::Combine(($drive.Root), "Program Files\WindowsPowerShell\Modules", $_.Name, $_.RequiredVersion))"
+            Write-Host "Copying $([System.IO.Path]::Combine($_.ModuleBase, $_.Name, $_.RequiredVersion)) to $([System.IO.Path]::Combine(($drive.Root), "Program Files\WindowsPowerShell\Modules", $_.Name, $_.RequiredVersion))"
             Copy-Item -Path ([System.IO.Path]::Combine($_.ModuleBase, $_.Name, $_.RequiredVersion)) `
                       -Destination ([System.IO.Path]::Combine(($drive.Root), "Program Files\WindowsPowerShell\Modules", $_.Name, $_.RequiredVersion)) `
                       -Recurse -Force -ErrorAction Stop | Out-Null
@@ -230,14 +192,14 @@
     }
 
 
-    #Dateien in .vhdx kopieren
-    Write-Host "Kopiere Dateien" 
+    # Copy files to .vhdx
+    Write-Host "Copying files" 
         
     $files | % {
 
         if ($_) {
 
-            Write-Host "Kopiere $($_.Source) nach $($_.Destination.Replace($_.Destination.Split("\")[0], $drive.Name + ":" ))"
+            Write-Host "Copying $($_.Source) to $($_.Destination.Replace($_.Destination.Split("\")[0], $drive.Name + ":" ))"
             Copy-Item -Path $($_.Source) `
                       -Destination $($_.Destination.Replace($_.Destination.Split("\")[0], $drive.Name + ":" )) `
                       -Force -Recurse -ErrorAction Stop  | Out-Null
@@ -245,10 +207,10 @@
     }
         
 
-    #Kopiere DSC Meta Config
+    # Copy DSC meta config
     if ($enableDSCReboot) {
 
-        Write-Host "Kopiere DSC metakonfig nach $(Join-Path -Path ($drive.Root) -ChildPath 'Windows\System32\Configuration\MetaConfig.mof')"
+        Write-Host "Copying DSC meta config to $(Join-Path -Path ($drive.Root) -ChildPath 'Windows\System32\Configuration\MetaConfig.mof')"
 
         $dscMetaConfig = @'
 /*
@@ -278,21 +240,23 @@ instance of OMI_ConfigurationDocument
 };
 '@
         $dscMetaConfig | Out-File $(Join-Path -Path ($drive.Root) -ChildPath 'Windows\System32\Configuration\MetaConfig.mof') -Force
-            
-
     }
 
 
-    #.vhdx trennen
-    Write-Host "Trenne $($drive.Root) => $($vmVHDPath)"
+    # Unmount .vhdx
+    Write-Host "Unmounting $($drive.Root) => $($vmVHDPath)"
     Dismount-VHD -Path $vmVHDPath
 
 
-    #VM erstellen und starten
 
-    Write-Host "Erstelle und starte $($vmName)"
+    #
+    # VM creation
+    #
 
-    $vm = New-VM -Name $vmName -MemoryStartupBytes $ram -VHDPath $vmVHDPath -Generation 2 -BootDevice VHD 
+    # Create and launch VM
+    Write-Host "Creating and launching $($vmName)"
+
+    $vm = New-VM -Name $vmName -MemoryStartupBytes $ram -VHDPath $vmVHDPath -Generation 2 -BootDevice VHD
     $vm | Get-VMNetworkAdapter | Remove-VMNetworkAdapter -ErrorAction Stop | Out-Null
     Set-VM -VM $vm -ProcessorCount $cores -ErrorAction Stop
     Get-VMIntegrationService -VM $vm | Enable-VMIntegrationService
@@ -309,8 +273,6 @@ instance of OMI_ConfigurationDocument
     }
             
     Start-VM -VM $vm | Out-Null
-
-    
 }
 
 
@@ -320,7 +282,7 @@ function New-VMNic ([string]$name, [Microsoft.HyperV.PowerShell.VMSwitchType]$ty
 
     if (-not (Get-VMSwitch -Name $name -SwitchType $type -ErrorAction SilentlyContinue)) {
 
-        Write-Host "Erstelle den virtuellen Switch $($name)"
+        Write-Host "Creating virtual switch $($name)"
         if ($type -eq [Microsoft.HyperV.PowerShell.VMSwitchType]::External -and $nic -ne $null) {
 
             New-VMSwitch -Name $name -NetAdapterName $nic 
@@ -534,7 +496,7 @@ elseif ((Get-NetIPAddress -InterfaceAlias `$adapter | ? {`$_.AddressFamily -ne "
 
 function DeleteItem([string]$path) {
 
-    Write-Host $("Entferne " + $path)
+    Write-Host $("Removing " + $path)
 
     $retry = $true
     

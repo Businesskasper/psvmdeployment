@@ -11,6 +11,7 @@ enum CertificateType {
 
 [DscResource()]
 class xMakeCertificate {
+
     [DscProperty(Key)]
     [CertificateType]$Type
 
@@ -65,6 +66,7 @@ class xMakeCertificate {
                 Move-Item $cert.PSPath -Destination $this.Store -Force
             }
             if ($this.Type -eq [CertificateType]::Web -and $this.SignerPath.Length -le 1) {
+
                 $rootStore = New-Object  -TypeName System.Security.Cryptography.X509Certificates.X509Store  -ArgumentList "root", "LocalMachine"
                 $rootStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
                 $rootStore.Add($cert)
@@ -120,6 +122,7 @@ class xMakeCertificate {
     [System.Security.Cryptography.X509Certificates.X509Certificate2] makeCertificate ([xMakeCertificate]$xCertificate) {
 
         $arguments = @{
+
             Subject           = $xCertificate.CommonName
             HashAlgorithm     = "sha256"
             KeyLength         = 2048
@@ -130,6 +133,7 @@ class xMakeCertificate {
         if ($this.SubjectAlternativeNames) {
 
             $arguments += @{
+
                 DnsName = $xCertificate.SubjectAlternativeNames
             }
         }
@@ -137,6 +141,7 @@ class xMakeCertificate {
         if ($xCertificate.Type -eq [CertificateType]::Root) {
 
             $arguments += @{
+                
                 KeyUsage         = "KeyEncipherment", "DigitalSignature", "CertSign", "cRLSign"
                 KeyusageProperty = "All"
                 TextExtension    = @("2.5.29.19 ={critical} {text}ca=1&pathlength=3")

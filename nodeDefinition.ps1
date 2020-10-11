@@ -12,17 +12,6 @@
             RebootNodeIfNeeded          = $true
         },
         @{
-            NodeName       = "SQLCore"
-            Roles          = @($NodeRoles.VM, $NodeRoles.SQL)
-            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_windows_server_version_2004_updated_may_2020_x64_dvd_1e7f1cfa.vhdx")
-            OSType         = 'Core'
-            RAM            = 4096MB
-            DiskSize       = 30GB
-            Cores          = 4
-            Online         = $true
-            Export         = $false
-        },
-        @{
             NodeName       = "DC"
             Roles          = @($NodeRoles.DC, $NodeRoles.VM, $NodeRoles.SQL)
             VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_windows_server_2019_updated_may_2020_x64_dvd_5651846f.vhdx")
@@ -44,6 +33,28 @@
             Export         = $false
         },
         @{
+            NodeName       = "SQLCore"
+            Roles          = @($NodeRoles.VM, $NodeRoles.SQL)
+            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_windows_server_version_2004_updated_may_2020_x64_dvd_1e7f1cfa.vhdx")
+            OSType         = 'Core'
+            RAM            = 4096MB
+            DiskSize       = 30GB
+            Cores          = 4
+            Online         = $true
+            Export         = $false
+            NICs           = @(
+                @{
+                    SwitchName = "Privat"
+                    SwitchType = "Private"
+                    IPAddress  = "192.168.1.11"
+                    SubnetCidr = "24"
+                    DNSAddress = "192.168.1.10"
+                    DHCP       = $false
+                }
+            )
+            JoinDomain     = $true
+        },
+        @{
             NodeName       = "Dev"
             Roles          = @($NodeRoles.VM, $NodeRoles.SQL, $NodeRoles.DEV)
             VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_windows_server_2019_updated_may_2020_x64_dvd_5651846f.vhdx")
@@ -51,20 +62,9 @@
             RAM            = 8192MB
             DiskSize       = 120GB
             Cores          = 4
-            Online         = $false
-            NICs           = @(
-                @{
-                    SwitchName = "Privat"
-                    SwitchType = "Private"
-                    IPAddress  = "192.168.1.10"
-                    SubnetCidr = "24"
-                    DNSAddress = "192.168.1.10"
-                    DHCP       = $false
-                }
-            )
+            Online         = $true
             Export         = $false
             NodeVersion    = 'LatestStable'
-
         }
     )
 }

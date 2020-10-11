@@ -23,9 +23,10 @@ catch {
 }
 
 
-$dhcp = Get-WmiObject Win32_NetworkAdapterConfiguration | ? {$_.DHCPEnabled -eq $true -and $_.DHCPServer -ne $null} | select -ExpandProperty DHCPServer
+$dhcp = Get-WmiObject Win32_NetworkAdapterConfiguration | ? { $_.DHCPEnabled -eq $true -and $_.DHCPServer -ne $null } | select -ExpandProperty DHCPServer
 
-if ($dhcp -ne $null) {
+if ($null -ne $dhcp) {
+    
     Write-InformationLog -source UpdateDnsForwarder -entryType Information -message "Found $($dhcp) as external DHCP and DNS address from HV NAT switch - updating Forwarders"
     
     try {

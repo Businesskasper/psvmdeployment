@@ -17,7 +17,7 @@
     Copyright            = ''
 
     # Beschreibung der von diesem Modul bereitgestellten Funktionen
-    Description          = 'Erstellt, signiert und installiert Zertifikate'
+    Description          = 'Creates and signs certificates'
 
     # Die für dieses Modul mindestens erforderliche Version des Windows PowerShell-Moduls
     PowerShellVersion    = '5.0'

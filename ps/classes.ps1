@@ -7,30 +7,43 @@
 
 class Application {
 
+    [ValidateNotNullOrEmpty()]
     [InstallType]$InstallType
+
+    [ValidateNotNullOrEmpty()]
     [string]$AppName
+    
+    [ValidateNotNullOrEmpty()]
     [hashtable]$SourcePath
+    
+    [ValidateNotNullOrEmpty()]
     [string]$BinaryPath
+    
     [string[]]$Arguments
+    
+    [ValidateNotNullOrEmpty()]
     [int[]]$ExitCodes
+    
+    [ValidateNotNullOrEmpty()]
     [string]$TestPath
+    
     [hashtable]$Shortcut
 
     [void] Validate() {
 
         if ($this.InstallType -eq [InstallType]::EXE -and $this.Arguments.Count -eq 0) {
 
-            throw [Exception]::new("Für .exe Setups müssen Installationsparameter angegeben werden") 
+            throw [Exception]::new("Installation parameters must be provided for .exe setups") 
         }
         
         if (-not (Test-Path ([System.IO.Path]::Combine($this.Dir, $this.SetupFile)))) {
 
-            throw [Exception]::new("Installer nicht gefunden") 
+            throw [Exception]::new("Binary not found") 
         }
 
         if ($this.InstallType -eq [InstallType]::MSI -and (-not $this.SetupFile.EndsWith(".msi"))) {
 
-            throw [Exception]::new("Für MSI Installer müssen MSI Pakete angegeben werden") 
+            throw [Exception]::new("A MSI package must be specified for .msi setups") 
         }
     }
 }

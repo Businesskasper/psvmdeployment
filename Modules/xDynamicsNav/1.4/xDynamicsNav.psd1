@@ -17,7 +17,7 @@
     Copyright            = ''
 
     # Beschreibung der von diesem Modul bereitgestellten Funktionen
-    Description          = 'Installiert ein .exe Setup'
+    Description          = 'A module for installing and managing Microsoft Dynamics NAV / Business Central'
 
     # Die für dieses Modul mindestens erforderliche Version des Windows PowerShell-Moduls
     PowerShellVersion    = '5.0'

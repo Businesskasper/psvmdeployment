@@ -20,8 +20,15 @@ else {
     $global:root = $MyInvocation.MyCommand.Definition | Split-Path -Parent 
 }
 
+# Prepare working directory
 $workingDir =  ([System.IO.Path]::Combine($global:root, [guid]::NewGuid()))
 md $workingDir -ea 0
+
+# Load kbupdate module
+if ((Get-Module -Name kbupdate -ListAvailable) -eq $null) {
+
+    Install-Module kbupdate -ErrorAction Stop
+}
 
 Import-Module kbupdate
 

@@ -46,8 +46,8 @@ class xInstallExe {
     
 
     [bool] Test() {
+
         return $this.isInstalled($this)
-        
     }
 
     [xInstallExe] Get() {
@@ -66,19 +66,25 @@ class xInstallExe {
 
 
     [bool] isInstalled([xInstallExe]$obj) {
+
         if ($obj.TestPath) {
+
             return $(Test-Path $obj.TestPath)
         }
         else {
+
             return $(Invoke-Expression -Command ($obj.TestExpression))
         }
        
     }
 
     [bool] install([string]$binaryPath, [string[]]$arguments, [int[]]$exitCodes) {
+
         if (Test-Path $binaryPath) {
+
             $setup = Start-Process -FilePath $binaryPath -ArgumentList $arguments -Wait -PassThru
             if ($setup.ExitCode -in $exitCodes) {
+
                 return $true
             }
         }
@@ -88,6 +94,7 @@ class xInstallExe {
     }
 
     [void] makeShortcut ( [string]$exe, [string]$destination, [string]$arguments ) {
+
         Write-Verbose "Erstelle Shortcut $($exe) nach $($destination)"
         $WshShell = New-Object -comObject WScript.Shell
 
@@ -99,8 +106,10 @@ class xInstallExe {
     }
 
     [Hashtable] CimInstancesToHashtable([Microsoft.Management.Infrastructure.CimInstance[]] $pairs) {
+
         $hash = @{}
         foreach ($pair in $pairs) {
+            
             Write-Verbose "Konvertiere Hashtable mit $($pair.Key) = $($pair.Value)"
             $hash[$pair.Key] = $pair.Value
         }
