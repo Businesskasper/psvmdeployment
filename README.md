@@ -32,18 +32,15 @@ Using this project, you can
 
 1. Create a base image as mentioned above.
 
-2. Restore used powershell modules as only my own modules are checked in.
+2. Restore used powershell modules since only my own modules are checked in.
 
-3. Edit the role definitions at [./ps/roles.ps1](./ps/roles.ps1). The roles consist of necessary powershell (and dsc) modules, files and applications, which must be installed. Applications itself are also defined in this file. A more precise explanation can be found [here]().
+3. Edit the role definition at [./ps/roles.ps1](./ps/roles.ps1). A role consists of necessary powershell (and dsc) modules, files and applications, which must be installed. Applications itself are also defined in this file. A more precise explanation can be found [here]().
 
-4. Restore necessary binaries within [./sources](./sources). I obviously did not include Sql Server ISO files to the git project. If you use any of the defined applications, you will have to get the binaries from the vendors website.
+4. Restore necessary binaries within [./sources](./sources). I obviously did not include a Sql Server ISO files to the git project. If you use any of the defined applications, you will have to get the binaries from the vendors website.
 
 5. Look at the runbook - this is where the configuration for each node is created. You can create multiple runbooks for multiple scenarios or create a big one with conditions (like mine). You can read the [microsoft docs](https://docs.microsoft.com/de-de/powershell/scripting/dsc/configurations/write-compile-apply-configuration?view=powershell-7) to get an in depth explanation.
 
-6. Define your nodes in [./nodeDefinition.ps1](./nodeDefinition.ps1). The Node definition is mapped into the [./runbook.ps1](./runbook.ps1). See the [detailed explanation]().
+6. Define your nodes in [./nodeDefinition.ps1](./nodeDefinition.ps1). The node definition is mapped into the [./runbook.ps1](./runbook.ps1). See the [detailed explanation](https://docs.microsoft.com/de-de/powershell/scripting/dsc/configurations/separatingenvdata?view=powershell-7).
 <br><br>
 
-## how you can write your own declarative environment definition
-<br><br>
-
-# Samples!
+7. Invoke run.ps1
