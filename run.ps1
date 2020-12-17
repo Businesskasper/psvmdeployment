@@ -53,7 +53,7 @@ foreach ($node in $configData.AllNodes) {
                     -systemLocale $node.SystemLocale `
                     -nics $node.NICS `
                     -online $node.Online `
-                    -dscModules $node.Roles.DscModules
+                    -psModules $node.Roles.DscModules
 
         # Query the DSC event log of the node
         $logJobs += Show-VMLog -vmName $node.NodeName -cred $node.LocalCredentials

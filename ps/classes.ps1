@@ -36,12 +36,12 @@ class Application {
             throw [Exception]::new("Installation parameters must be provided for .exe setups") 
         }
         
-        if (-not (Test-Path ([System.IO.Path]::Combine($this.Dir, $this.SetupFile)))) {
+        if (-not (Test-Path $this.SourcePath.Source)) {
 
             throw [Exception]::new("Binary not found") 
         }
 
-        if ($this.InstallType -eq [InstallType]::MSI -and (-not $this.SetupFile.EndsWith(".msi"))) {
+        if ($this.InstallType -eq [InstallType]::MSI -and (-not $this.BinaryPath -like "*msiexec.exe*")) {
 
             throw [Exception]::new("A MSI package must be specified for .msi setups") 
         }
@@ -98,7 +98,7 @@ class NodeRole {
 
     [Application[]] $Applications
 
-    [DscModule[]] $DscModules
+    [PsModule[]] $DscModules
 
     [Hashtable[]] $Files
 

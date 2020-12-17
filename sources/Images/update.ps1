@@ -1,12 +1,12 @@
 ﻿param(
 
-    [string]$ISO = 'C:\temp\en_windows_server_2019_updated_may_2020_x64_dvd_5651846f.iso',
+    [string]$ISO = 'C:\Hyper-V\psvmdeployment\sources\Images\en_windows_server_2019_updated_nov_2020_x64_dvd_8600b05f.iso',
 
     [ValidateSet('Windows Server', 'Windows 10')]
     [string]$Product = 'Windows Server',
 
     [ValidateSet('Standard', 'Datacenter', 'Standard (Desktop Experience)')]
-    [string]$SKU = 'Standard',
+    [string]$SKU = 'Standard (Desktop Experience)',
 
     [string]$Version = '2019'
 )
@@ -22,7 +22,27 @@ else {
 
 # Prepare working directory
 $workingDir =  ([System.IO.Path]::Combine($global:root, [guid]::NewGuid()))
-md $workingDir -ea 0
+md $workingDir -ea 0 | Out-Null
+
+
+# Download sdelete
+$sdeleteDir = [System.IO.Path]::combine($global:root, "sdelete")
+$sdeletePath = [System.IO.Path]::combine($sdeleteDir, "sdelete64.exe")
+if (-not (Test-Path -Path $sdeletePath)) {
+
+    $sdeleteZipPath = [System.IO.Path]::combine($sdeleteDir, "sdelete.zip")
+    md $sdeleteDir -ea 0 | Out-Null
+    Invoke-WebRequest -method Get -uri "https://download.sysinternals.com/files/SDelete.zip" -outfile $sdeleteZipPath | Out-Null
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($sdeleteZipPath, $sdeleteDir)
+    Remove-Item -Path $sdeleteZipPath -ErrorAction SilentlyContinue -Force
+    if (-not (Test-Path -Path "HKCU:\Software\Sysinternals\SDelete")) {
+
+        New-Item -Path "HKCU:\Software\Sysinternals\" -Name Sdelete | Out-Null
+        New-ItemProperty -Path "HKCU:\Software\Sysinternals\SDelete" -Name EulaAccepted -Value 1 | Out-Null
+    }
+}
+
 
 # Load kbupdate module
 if ((Get-Module -Name kbupdate -ListAvailable) -eq $null) {
@@ -122,7 +142,7 @@ $bcdBootArgs = @(
     "/f UEFI"                   # ÜFI
 )
 
-Start-Process -FilePath "C:\windows\system32\bcdboot.exe" -ArgumentList $bcdBootArgs -PassThru -Wait 
+Start-Process -FilePath "C:\windows\system32\bcdboot.exe" -ArgumentList $bcdBootArgs -Wait | out-null
 
 
 #Add .net
@@ -136,9 +156,9 @@ Add-WindowsPackage -PackagePath $updatePath -Path "$($osPartition.DriveLetter):"
 $systemPartition | Remove-PartitionAccessPath -AccessPath $systemPartition.AccessPaths[0]
 
 #Zeroing free space
-Start-Process -FilePath C:\tools\sdelete\sdelete64.exe -ArgumentList @("-q", "-s", "-c", $windowsDrive) -Wait -PassThru
+Start-Process -FilePath $sdeletePath -ArgumentList @("-q", "-s", "-c", $windowsDrive) -Wait -PassThru
 #Cleaning free space
-Start-Process -FilePath C:\tools\sdelete\sdelete64.exe -ArgumentList @("-q", "-s", "-z", $windowsDrive) -Wait -PassThru
+Start-Process -FilePath $sdeletePath -ArgumentList @("-q", "-s", "-z", $windowsDrive) -Wait -PassThru
 
 Dismount-DiskImage -ImagePath $ISO -StorageType ISO
 Dismount-VHD -Path ([System.IO.Path]::Combine($workingDir, (Split-Path -Path $ISO -Leaf).Split(".")[0]) + ".vhdx") 
@@ -153,3 +173,4 @@ Dismount-VHD -Path ([System.IO.Path]::Combine($workingDir, (Split-Path -Path $IS
 Move-Item -Path ([System.IO.Path]::Combine($workingDir, (Split-Path -Path $ISO -Leaf).Split(".")[0]) + ".vhdx") -Destination $global:root -Force -Confirm:$false
 
 Remove-Item -Path $workingDir -Force -Recurse -Confirm:$false
+Remove-Item -Path $sdeleteDir -Force -Recurse -Confirm:$false

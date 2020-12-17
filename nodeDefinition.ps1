@@ -11,10 +11,10 @@
             PSDscAllowDomainUser        = $true
             RebootNodeIfNeeded          = $true
         },
-        @{
+        <#@{
             NodeName       = "DC"
             Roles          = @($NodeRoles.DC, $NodeRoles.VM, $NodeRoles.SQL)
-            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_windows_server_2019_updated_may_2020_x64_dvd_5651846f.vhdx")
+            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_window_server_version_20h2_updated_nov_2020_x64_dvd_26fe579c.vhdx")
             OSType         = 'Standard'
             RAM            = 8192MB
             DiskSize       = 120GB
@@ -35,7 +35,7 @@
         @{
             NodeName       = "SQLCore"
             Roles          = @($NodeRoles.VM, $NodeRoles.SQL)
-            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_windows_server_version_2004_updated_may_2020_x64_dvd_1e7f1cfa.vhdx")
+            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_window_server_version_20h2_updated_nov_2020_x64_dvd_26fe579c.vhdx")
             OSType         = 'Core'
             RAM            = 4096MB
             DiskSize       = 30GB
@@ -57,7 +57,7 @@
         @{
             NodeName       = "Dev"
             Roles          = @($NodeRoles.VM, $NodeRoles.SQL, $NodeRoles.DEV)
-            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_windows_server_2019_updated_may_2020_x64_dvd_5651846f.vhdx")
+            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_window_server_version_20h2_updated_nov_2020_x64_dvd_26fe579c.vhdx")
             OSType         = 'Standard'
             RAM            = 8192MB
             DiskSize       = 120GB
@@ -65,6 +65,28 @@
             Online         = $true
             Export         = $false
             NodeVersion    = 'LatestStable'
+        }#>
+        @{
+            NodeName       = "Dev"
+            Roles          = @(
+                                $NodeRoles.VM
+                            )
+            Applications   = @(
+                                $Applications.GoogleChrome,
+                                $Applications.VSPro2019, 
+                                $Applications.VSCode, 
+                                $Applications.NodeJSLatestStable,
+                                $Applications.Git
+                                $Applications.SSMS
+                                $Applications.MSSQL2019DEV
+                            )
+            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_windows_server_2019_updated_nov_2020_x64_dvd_8600b05f.vhdx")
+            OSType         = 'Standard'
+            RAM            = 8192MB
+            DiskSize       = 120GB
+            Cores          = 4
+            Online         = $true
+            Export         = $false
         }
     )
 }

@@ -7,6 +7,7 @@ else {
     $scriptDir = $MyInvocation.MyCommand.Definition | Split-Path -Parent 
 }
 
+Remove-Item -Path "$scriptDir\*" -Recurse -Force -Exclude @("AppAssociations.xml", "update.ps1") -Confirm:$false
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 

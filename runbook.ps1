@@ -356,13 +356,24 @@
             }
         }
 
-        if ($node.NodeVersion -ne $null) {
+        xInstallExe NodeJSLatestStable {
+        
+            Ensure = 'Present'
+            Arguments = '/I C:\Sources\Software\NodeJS\LatestStable\node-LatestStable-x64.msi /q'
+            AppName = 'NodeJSLatestStable'
+            BinaryPath = 'C:\windows\system32\msiexec.exe'
+            ExitCodes = @(0, 3010)
+            TestPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{F62C0E94-FBB4-4009-9941-6271BD2EBCEF}'
+        }
 
-            xNodeJS NodeJS {
-                
-               Ensure = 'Present'
-               MajorVersion = $node.NodeVersion
-            }
+        xInstallExe Git {
+
+            Ensure = 'Present'
+            Arguments = '/VERYSILENT'
+            AppName = 'Git'
+            BinaryPath = 'C:\Sources\Software\Git\setup.exe'
+            ExitCodes = @(0, 3010)
+            TestPath = 'HKLM:\SOFTWARE\GitForWindows'
         }
     }
 

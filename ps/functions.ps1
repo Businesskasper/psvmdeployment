@@ -337,6 +337,7 @@ Height="500" Width="800" Topmost="False">
         <DataGrid.Columns>
             <DataGridTextColumn Header="TimeCreated"
                             Binding="{Binding TimeCreated}" 
+                            SortDirection="Descending"
                             />
             <DataGridTextColumn Header="Message"
                             Binding="{Binding Message}"
