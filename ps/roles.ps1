@@ -210,18 +210,54 @@ $NodeRoles.SQL = [NodeRole]@{
         @{
             Source      = [System.IO.Path]::Combine($global:root, 'Sources', 'Software', 'Microsoft_SQL_Server_2019_Developer')
             Destination = 'C:\Sources\Software\Microsoft_SQL_Server_2019_Developer\'
+        },
+        @{
+            Source      = [System.IO.Path]::Combine($global:root, "Sources", "Software", "Microsoft_SSMS")
+            Destination = 'C:\Sources\Software\Microsoft_SSMS\'
         }
     )
 
 
-    Applications = @($Applications.SSMS)
+    Applications = @()
 }
 
 $NodeRoles.DEV = [NodeRole]@{
 
     Name = "DEV"
 
-    Applications = @($Applications.GoogleChrome, $Applications.VSCode, $Applications.VSPro2019, $Applications.NodeJSLatestStable, $Applications.Git, $Applications.MSSQL2019DEV)
+    Files =  @(
+
+        @{
+            Source = [System.IO.Path]::Combine($global:root, "Sources", "Software", "Google_Chrome")
+            Destination = 'C:\Sources\Software\Google_Chrome\'
+        },
+        @{
+            Source      = [System.IO.Path]::Combine($global:root, "Sources", "Software", "Microsoft_SSMS")
+            Destination = 'C:\Sources\Software\Microsoft_SSMS\'
+        },
+        @{
+            Source      = [System.IO.Path]::Combine($global:root, 'Sources', 'Software', 'Microsoft_VS_2019_Professional')
+            Destination = 'C:\Sources\Software\Microsoft_VS_2019_Professional\'
+        },
+        @{
+            Source      = [System.IO.Path]::Combine($global:root, 'Sources', 'Software', 'Microsoft_VS_Code')
+            Destination = 'C:\Sources\Software\Microsoft_VS_Code\'
+        },
+        @{
+            Source      = [System.IO.Path]::Combine($global:root, 'Sources', 'Software', 'NodeJS', 'LatestStable')
+            Destination = 'C:\Sources\Software\NodeJS\LatestStable\'
+        },
+        @{
+            Source      = [System.IO.Path]::Combine($global:root, 'Sources', 'Software', 'Git')
+            Destination = 'C:\Sources\Software\Git\'
+        },
+        @{
+            Source = [System.IO.Path]::Combine($global:root, 'Sources', 'Software', 'Microsoft_SQL_Server_2019_Developer')
+            Destination = 'C:\Sources\Software\Microsoft_SQL_Server_2019_Developer\'
+        }
+    )
+
+    Applications = @()
 
     DscModules = @(
     
@@ -231,10 +267,8 @@ $NodeRoles.DEV = [NodeRole]@{
             ModuleBase = [System.IO.Path]::Combine($global:root, 'modules')
         }
     )
-
-    Files =  @(
-    )
 }
+
 <#
 $NodeRoles.BC = [NodeRole]@{
 

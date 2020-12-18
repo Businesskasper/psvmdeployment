@@ -189,13 +189,13 @@
         SqlSetup SQL2019 {
 
             Action              = 'Install'
-            SourcePath          = 'C:\Sources\SQL\Microsoft_SQL_Server_2019_Standard'
+            SourcePath          = 'C:\Sources\SQL\Microsoft_SQL_Server_2019_Developer'
             Features            = 'SQLEngine'
             SQLCollation        = 'Latin1_General_100_CS_AS'
             InstanceName        = "SQL2019"
             SuppressReboot      = $false
             UpdateEnabled       = $false
-            SQLSysAdminAccounts = @($node.LocalCredentials.UserName, $node.DomainCredentials.UserName) #+ $node.LocalAdmins
+            SQLSysAdminAccounts = @($node.LocalCredentials.UserName, $node.DomainCredentials.UserName) | ? {-not ([String]::IsNullOrWhiteSpace($_))}
             InstallSharedDir    = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir = 'C:\Program Files (x86)\Microsoft SQL Server'
             InstanceDir         = 'C:\Program Files\Microsoft SQL Server'
@@ -205,8 +205,7 @@
             SQLTempDBDir        = 'C:\SQL\Data'
             SQLTempDBLogDir     = 'C:\SQL\Data'
             SQLBackupDir        = 'C:\SQL\Backup'
-            SQLSvcAccount       = $node.LocalCredentials
-            #SQLSvcAccount       = if ($node.DomainCredentials -ne $null) {$node.DomainCredentials} else {$node.LocalCredentials}
+            SQLSvcAccount       = if ($node.DomainCredentials -ne $null -and ($node.JoinDomain -or $node.Roles.contains($NodeRoles.DC))) {$node.DomainCredentials} else {$node.LocalCredentials}
         }
 
         ServiceSet SQLService {
@@ -374,6 +373,36 @@
             BinaryPath = 'C:\Sources\Software\Git\setup.exe'
             ExitCodes = @(0, 3010)
             TestPath = 'HKLM:\SOFTWARE\GitForWindows'
+        }
+
+        xInstallExe GoogleChrome {
+
+            Ensure = 'Present'
+            Arguments = '/i C:\Sources\Software\Google_Chrome\GoogleChromeStandaloneEnterprise64.msi /q'
+            AppName = 'Google Chrome'
+            BinaryPath = 'C:\Windows\System32\msiexec.exe'
+            ExitCodes = @(0)
+            TestPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9EACB46-9179-3C2D-A196-62006713EC8E}'
+        }
+
+        Script RebootDEV {
+
+            TestScript = {
+
+                return (Test-Path HKLM:\SOFTWARE\DSC\RebootDEV)
+            }
+            SetScript  = {
+
+                New-Item -Path HKLM:\SOFTWARE\DSC\RebootDEV -Force
+                $global:DSCMachineStatus = 1 
+            }
+            GetScript  = { 
+            
+                return @{
+
+                    Result = $(Test-Path "HKLM:\SOFTWARE\DSC\RebootDEV")
+                }
+            }
         }
     }
 

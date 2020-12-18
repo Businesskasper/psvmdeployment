@@ -54,18 +54,7 @@
             )
             JoinDomain     = $true
         },
-        @{
-            NodeName       = "Dev"
-            Roles          = @($NodeRoles.VM, $NodeRoles.SQL, $NodeRoles.DEV)
-            VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_window_server_version_20h2_updated_nov_2020_x64_dvd_26fe579c.vhdx")
-            OSType         = 'Standard'
-            RAM            = 8192MB
-            DiskSize       = 120GB
-            Cores          = 4
-            Online         = $true
-            Export         = $false
-            NodeVersion    = 'LatestStable'
-        }#>
+        #>
         @{
             NodeName       = "Dev"
             Roles          = @(
@@ -87,6 +76,7 @@
             Cores          = 4
             Online         = $true
             Export         = $false
+            JoinDomain     = $false
         }
     )
 }
