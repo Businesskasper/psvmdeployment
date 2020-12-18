@@ -204,17 +204,17 @@ $NodeRoles.SQL = [NodeRole]@{
         }
 
     )
-    <#
+
     Files =  @(
 
         @{
-            Source      = [System.IO.Path]::Combine($global:root, 'Sources', 'Software', 'Microsoft_SQL_Server_2019_Standard')
-            Destination = 'C:\Sources\SQL\Microsoft_SQL_Server_2019_Standard\'
+            Source      = [System.IO.Path]::Combine($global:root, 'Sources', 'Software', 'Microsoft_SQL_Server_2019_Developer')
+            Destination = 'C:\Sources\Software\Microsoft_SQL_Server_2019_Developer\'
         }
     )
-    #>
 
-    Applications = @($Applications.SSMS, $Applications.MSSQL2019DEV)
+
+    Applications = @($Applications.SSMS)
 }
 
 $NodeRoles.DEV = [NodeRole]@{
