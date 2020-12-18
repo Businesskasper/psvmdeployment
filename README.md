@@ -29,7 +29,7 @@ Using this project, you can
 
 ## how you can run it
 
-1. Create a base image either yourself or using [./sources/images/update.ps1](./sources/images/update.ps1).
+1. Create a base image either yourself or using [./sources/Images/update.ps1](./sources/Images/update.ps1).
 
 2. Restore used powershell modules since only my own modules are checked in.
 
@@ -38,8 +38,7 @@ Using this project, you can
 4. Look at the runbook - this is where the configuration for each node is created. You can create multiple runbooks for multiple scenarios or create a big one with conditions (like mine). You can read the [microsoft docs](https://docs.microsoft.com/de-de/powershell/scripting/dsc/configurations/write-compile-apply-configuration?view=powershell-7) to get an in depth explanation.
 
 5. Define your nodes in [./nodeDefinition.ps1](./nodeDefinition.ps1). The node definition is mapped into the [./runbook.ps1](./runbook.ps1). See the [detailed explanation](https://docs.microsoft.com/de-de/powershell/scripting/dsc/configurations/separatingenvdata?view=powershell-7).
-<br><br>
 
-6. Update your deployment workbench using [./ps/update.ps1]. This will download all required software packages and prepare them for deployment.
+6. Update your deployment workbench using [./ps/update.ps1](./ps/update.ps1). This will download all required software packages and prepare them for deployment.
 
 7. Invoke run.ps1
