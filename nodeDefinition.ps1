@@ -57,18 +57,8 @@
         #>
         @{
             NodeName       = "Dev"
-            Roles          = @(
-                                $NodeRoles.VM
-                            )
-            Applications   = @(
-                                $Applications.GoogleChrome,
-                                $Applications.VSPro2019, 
-                                $Applications.VSCode, 
-                                $Applications.NodeJSLatestStable,
-                                $Applications.Git
-                                $Applications.SSMS
-                                $Applications.MSSQL2019DEV
-                            )
+            Roles          = @($NodeRoles.VM)
+            Applications   = @($Applications.GoogleChrome, $Applications.VSPro2019, $Applications.VSCode, $Applications.NodeJSLatestStable, $Applications.Git, $Applications.SSMS, $Applications.MSSQL2019DEV)
             VhdxPath       = [io.path]::combine($global:root, "Sources", "Images", "en_windows_server_2019_updated_nov_2020_x64_dvd_8600b05f.vhdx")
             OSType         = 'Standard'
             RAM            = 8192MB

@@ -45,7 +45,7 @@ $Applications.VSPro2019 = [Application]@{
     Shortcut   = @{
         Exe       = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\IDE\devenv.exe"
     }
-    TestPath = 'hklm:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\83d3efc7'
+    TestPath = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\83d3efc7'
 }
 
 $Applications.VSCode = [Application]@{
