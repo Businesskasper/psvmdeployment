@@ -2,12 +2,9 @@
 
 Automated vm environment creation using powershell and desired state configuration.
 <br><br>
-
-## the purpose of this project
-
 I use this project to deploy virtual environments on my local hyper-v machine. This includes the whole process from automated creation of up-to-date base images, parsing of role - based declarative environment configurations to the deployment and state monitoring of the virtual machines.
 
-The scripts (especially the DSC Modules I created) can be used in many ways. Feel free to give me feedback!
+The scripts (especially the DSC Modules I created) can be used in many ways.
 <br><br>
 
 ## how it works
@@ -22,12 +19,12 @@ Using this project, you can
 3. Create up-to-date (OS and Software) virtual machines. I use this to create a development machine for each project I work on, with the right Node.js or .Net Version installed.
 <br><br>
 
-## what you need to use it
+## prerequisites
 
 * Hyper-V must be installed
 * Powershell Get must be installed and psgallery must be set as the default provider
 
-## how you can run it
+## how to run
 
 1. Create a base image either yourself or using [./sources/Images/update.ps1](./sources/Images/update.ps1).
 
