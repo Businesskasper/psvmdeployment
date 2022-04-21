@@ -1,18 +1,18 @@
 ﻿if ($psISE) {
-
-    $scriptDir = $psISE.CurrentFile | select -ExpandProperty FullPath | Split-Path -Parent
+    $root = $psISE.CurrentFile | select -ExpandProperty FullPath | Split-Path -Parent
 }
 else {
-
-    $scriptDir = $MyInvocation.MyCommand.Definition | Split-Path -Parent 
+    if ($profile -match "VSCode") { 
+        $root = $psEditor.GetEditorContext().CurrentFile.Path | Split-Path -Parent
+    }
+    else {
+        $root = $MyInvocation.MyCommand.Definition | Split-Path -Parent 
+    }
 }
 
-
-Remove-Item -Path "$($scriptDir)\*" -Exclude @("install.ps1", "update.ps1") -Recurse -Force -Confirm:$false
-
-$setupPath = [System.IO.Path]::Combine($scriptDir, "setup.exe")
+Remove-Item -Path "$($root)\*" -Exclude @("install.ps1", "update.ps1") -Recurse -Force -Confirm:$false
 
 $latestRequest = Invoke-WebRequest -Method Get -Uri https://api.github.com/repos/git-for-windows/git/releases/latest -UseBasicParsing | ConvertFrom-Json
-$latestAsset = $latestRequest.assets | ? {$_.content_type -eq "application/executable" -and $_.name -like "*64-bit.exe"} | select -First 1
+$latestAsset = $latestRequest.assets | ? { $_.content_type -eq "application/executable" -and $_.name -like "*64-bit.exe" } | select -First 1
 
-Invoke-WebRequest -Method Get -Uri $latestAsset.browser_download_url -UseBasicParsing -OutFile $setupPath
+Invoke-WebRequest -Method Get -Uri $latestAsset.browser_download_url -UseBasicParsing -OutFile "$($root)\setup.exe"
