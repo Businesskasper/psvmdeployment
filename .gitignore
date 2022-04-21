@@ -1,5 +1,8 @@
-sources/*
-!sources/*.ps1
+sources/Software/**
+!sources/Software/**/*.ps1
+
+sources/Images/**
+!sources/Images/**/*.ps1
 
 modules/ComputerManagementDsc
 modules/SqlServer
