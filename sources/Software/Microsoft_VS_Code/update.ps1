@@ -15,6 +15,7 @@ Write-Host "Update `"Visual Studio Code`"...   "
 try {
     $setupPath = [System.IO.Path]::Combine($root, "setup.exe")
     
+    [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
     Invoke-WebRequest -Method Get -Uri "https://update.code.visualstudio.com/latest/win32-x64/stable" -OutFile $setupPath
 
     Write-Host $([char]0x221A) -ForegroundColor Green 

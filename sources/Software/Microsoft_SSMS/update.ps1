@@ -15,6 +15,7 @@ Write-Host "Update `"SQL Server Management Studio`"...   " -NoNewLine
 try {
     $setupPath = [System.IO.Path]::Combine($root, "SSMS-Setup-ENU.exe")
     
+    [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
     Invoke-WebRequest -Method Get -Uri "https://aka.ms/ssmsfullsetup" -OutFile $setupPath
 
     Write-Host $([char]0x221A) -ForegroundColor Green 

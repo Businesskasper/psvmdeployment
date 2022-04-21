@@ -16,6 +16,7 @@ try {
     Remove-Item -Path $root -Exclude @("update.ps1", "install.ps1", "certmgr.exe") -Recurse -Force -Confirm:$false
     
     $setupFile = [System.IO.Path]::Combine($root, "vs_professional.exe")
+    [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
     Invoke-WebRequest -Method Get -Uri "https://aka.ms/vs/16/release/vs_professional.exe" -OutFile $setupFile
     
     $buildPackage = Start-Process -FilePath ([System.IO.Path]::Combine($root, "vs_professional.exe")) -ArgumentList @(

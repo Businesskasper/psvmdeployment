@@ -17,6 +17,7 @@ try {
     
     $isoPath = [System.IO.Path]::Combine($root, "SQLServer2019-x64-ENU-Dev.iso")
     
+    [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
     Invoke-WebRequest -Method Get -Uri "https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SQLServer2019-x64-ENU-Dev.iso" -OutFile $isoPath
     
     $mountResult = Mount-DiskImage -ImagePath $isoPath -StorageType ISO -PassThru

@@ -16,6 +16,7 @@ try {
     Remove-Item -Path $root -Exclude @("update.ps1") -Recurse -Force -Confirm:$false
     
     #Get Versions
+    [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
     $versions = Invoke-WebRequest -Uri "https://nodejs.org/dist/index.json" -UseBasicParsing | ConvertFrom-Json
     $versions.ForEach({
         $_.version = [Version]::new($_.version.ToString().TrimStart("v"))
@@ -29,6 +30,7 @@ try {
     $latestStable = $versionsByMajor[0].Group | select -First 1
     Write-Host "Download latest stable: $($latestStable.version)"
     $downloadPath = New-Item -Path $root -Name LatestStable -ItemType Directory -Force
+    [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
     Invoke-WebRequest -Uri "https://nodejs.org/dist/v$($latestStable.version.ToString())/node-v$($latestStable.version.ToString())-x64.msi" -OutFile ([System.IO.Path]::Combine($downloadPath.FullName, "node-LatestStable-x64.msi")) -UseBasicParsing              
     
     # Download LTS versions per major release
@@ -38,6 +40,7 @@ try {
         Write-Host "Download $($lts.version)"
     
         $downloadPath = New-Item -Path $root -Name $($lts.version.ToString().TrimStart("v")) -ItemType Directory -Force
+        [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
         Invoke-WebRequest -Uri "https://nodejs.org/dist/v$($lts.version.ToString())/node-v$($lts.version.ToString())-x64.msi" -OutFile ([System.IO.Path]::Combine($downloadPath.FullName, "node-v$($lts.version.ToString())-x64.msi")) -UseBasicParsing
     }
 
