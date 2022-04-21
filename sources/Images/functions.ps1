@@ -5,7 +5,7 @@ function GetLatestUpdate ([string]$Product, [string]$Version, [DateTime]$Month =
 
     $_month = $Month.ToString('yyyy-MM')
 
-    $updateCatalog = Invoke-WebRequest -Uri "https://www.catalog.update.microsoft.com/Search.aspx?q=$($_month)%20$($Version)" 
+    $updateCatalog = Invoke-WebRequest -Uri "https://www.catalog.update.microsoft.com/Search.aspx?q=$($_month)%20$($Version)"
     $table = $updateCatalog.ParsedHtml.getElementById('tableContainer').firstChild.firstChild
 
     foreach ($item in $table.childNodes) {
@@ -28,7 +28,7 @@ function DownloadSDelete([string]$installDir) {
     md $installDir -ea 0 | Out-Null
     $sdeleteZipPath = [System.IO.Path]::combine($installDir, "sdelete.zip")
     Invoke-WebRequest -method Get -uri "https://download.sysinternals.com/files/SDelete.zip" -outfile $sdeleteZipPath | Out-Null
-        
+       
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     [System.IO.Compression.ZipFile]::ExtractToDirectory($sdeleteZipPath, $installDir)
     Remove-Item -Path $sdeleteZipPath -ErrorAction SilentlyContinue -Force
@@ -42,4 +42,36 @@ function DownloadSDelete([string]$installDir) {
     New-ItemProperty -Path "HKCU:\Software\Sysinternals\SDelete" -Name EulaAccepted -Value 1 -ErrorAction SilentlyContinue | Out-Null
 
     return $sdeletePath
+}
+
+function EnsurePath([string]$path) {
+    if ([String]::IsNullOrWhiteSpace($path)) {
+        return
+    }
+
+    $parent = Split-Path -Path $path -Parent
+    if ($null -ne $parent -and $parent -ne $path) {
+        EnsurePath -path $parent
+    }
+   
+    if (-not (Test-Path -Path $path)) {
+        New-Item -Path $path -ItemType Directory | Out-Null
+    }
+}
+
+function SetItemProperty([string]$path, [string]$name, [string]$type, [object]$value) {
+    EnsurePath -path $path
+
+    $key = Get-Item -Path $path
+    if ($null -eq $key) {
+        New-Item -Path $path | Out-Null
+    }
+
+    $property = Get-ItemProperty -Path $path -Name $name
+    if ($null -eq $property) {
+        New-ItemProperty -Path $path -Name $name -PropertyType $type -Value $value | Out-Null
+    }
+    else {
+        Set-ItemProperty -Path $path -Name $name -Value $value
+    }
 }

@@ -19,11 +19,11 @@ if ($psISE) {
     $root = $psISE.CurrentFile | select -ExpandProperty FullPath | Split-Path -Parent
 }
 else {
-    if ($profile -match "VSCode") { 
+    if ($profile -match "VSCode") {
         $root = $psEditor.GetEditorContext().CurrentFile.Path | Split-Path -Parent
     }
     else {
-        $root = $MyInvocation.MyCommand.Definition | Split-Path -Parent 
+        $root = $MyInvocation.MyCommand.Definition | Split-Path -Parent
     }
 }
 
@@ -32,6 +32,13 @@ else {
 $workingDir = "$($root)\$([guid]::NewGuid())"
 Write-Host "Prepare working directory in `"$($workingDir)`""
 md $workingDir -ea 0 | Out-Null
+
+# Temporarily disable forced data drive encryption
+$forcedEncryptionKey = "HKLM:\SYSTEM\CurrentControlSet\Policies\Microsoft\FVE"
+$isForcedEncryptionEnabled = (Get-ItemPropertyValue -Path $forcedEncryptionKey -Name "FDVDenyWriteAccess") -eq 1
+if ($isForcedEncryptionEnabled) {
+    SetItemProperty -path $forcedEncryptionKey -name "FDVDenyWriteAccess" -type DWORD -value 0
+}
 
 Write-Host "Download sdelete"
 $sdeleteDir = "$($workingDir)\sdelete"
@@ -59,7 +66,7 @@ if (-not (Test-Path -Path $isoPath)) {
 }
 $before = Get-PSDrive -PSProvider FileSystem
 $isoMount = Mount-DiskImage -ImagePath $isoPath -StorageType ISO -Access ReadOnly -PassThru
-$after = Get-PSDrive -PSProvider FileSystem 
+$after = Get-PSDrive -PSProvider FileSystem
 $isoDriveLetter = Compare-Object -ReferenceObject $before -DifferenceObject $after | select -ExpandProperty InputObject | select -ExpandProperty Root
 
 Write-Host "Create VHDX"
@@ -71,8 +78,8 @@ if (Test-Path -Path $vhdxPath) {
     Remove-Item -Path $vhdxPath -Force
 }
 
-$vhdx = New-VHD -Dynamic -Path $vhdxPath -SizeBytes $vhdxInitialSize  | 
-Mount-VHD -Passthru | 
+$vhdx = New-VHD -Dynamic -Path $vhdxPath -SizeBytes $vhdxInitialSize  |
+Mount-VHD -Passthru |
 Initialize-Disk -PassThru -PartitionStyle GPT
 
 Write-Host "Create Partitions"
@@ -87,7 +94,7 @@ $vhdx | New-Partition -Size 128MB -GptType '{e3c9e316-0b5c-4db8-817d-f92df00215a
 
 $osPartition = $vhdx | New-Partition -UseMaximumSize -GptType '{ebd0a0a2-b9e5-4433-87c0-68b6b72699c7}'
 $osPartition | Format-Volume -FileSystem NTFS -Force | Out-Null
-$osPartition | Add-PartitionAccessPath -AssignDriveLetter 
+$osPartition | Add-PartitionAccessPath -AssignDriveLetter
 $osPartition = $osPartition | Get-Partition
 $windowsDrive = $osPartition.AccessPaths[0].substring(0, 2)
 
@@ -130,9 +137,13 @@ Dismount-VHD -Path $vhdxPath | Out-Null
 Write-Host "Optimize VHDX"
 Mount-VHD -Path $vhdxPath -ReadOnly
 Optimize-VHD -Path $vhdxPath -Mode Full
-Resize-VHD -Path $vhdxPath -ToMinimumSize 
-Dismount-VHD -Path $vhdxPath 
+Resize-VHD -Path $vhdxPath -ToMinimumSize
+Dismount-VHD -Path $vhdxPath
 
 Write-Host "Cleanup"
+# Reenable forced data drive encryption
+if ($isForcedEncryptionEnabled) {
+    SetItemProperty -path $forcedEncryptionKey -name "FDVDenyWriteAccess" -type DWORD -value 1
+}
 Move-Item -Path $vhdxPath -Destination $root -Force -Confirm:$false
 Remove-Item -Path $workingDir -Force -Recurse -Confirm:$false
