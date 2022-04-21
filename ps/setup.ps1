@@ -19,21 +19,21 @@ else {
 
 Write-Host ([Environment]::NewLine)
 
-Write-Host "Check if Hyper-V needs to be installed...   " -NoNewLine
+Write-Host "Check if Hyper-V service and module are installed...   " -NoNewLine
 $installHyperV = $false
 $hvModule = Get-Module -ListAvailable Hyper-V -ErrorAction SilentlyContinue
 if ($null -eq $hvModule) {
-    Write-Host $([char]0x274C) -ForegroundColor Red
+    Write-Host $([char]0x0078) -ForegroundColor Red
     $installHyperV = $true
 }
 else {
     $vmHost = Get-VMHost -ErrorAction SilentlyContinue
     if ($null -eq $vmHost) {
-        Write-Host $([char]0x274C) -ForegroundColor Red
+        Write-Host $([char]0x0078) -ForegroundColor Red
         $installHyperV = $true
     }
     else {
-        Write-Host $([char]0x2713) -ForegroundColor Green
+        Write-Host $([char]0x221A) -ForegroundColor Green
         $installHyperV = $false
     }
 }
@@ -43,13 +43,13 @@ if ($installHyperV) {
     try {
         $hyperVSetup = Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -NoRestart -ErrorAction Stop | Out-Null
         Write-Progress -Completed -Activity "*"
-        Write-Host $([char]0x2713) -ForegroundColor Green
+        Write-Host $([char]0x221A) -ForegroundColor Green
         if ($hyperVSetup.RestartNeeded) {
             Write-Host "Please Reboot after completion" -ForegroundColor Yellow
         }
     }
     catch [Exception] {
-        Write-Host $([char]0x274C) -ForegroundColor Red
+        Write-Host $([char]0x0078) -ForegroundColor Red
         Write-Host "Something went wrong:`n$($_.Exception.Message)"
         break
     }
@@ -58,10 +58,10 @@ if ($installHyperV) {
 Write-Host "Enable required TLS Versions for PowerShellGet...   " -NoNewline
 try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-    Write-Host $([char]0x2713) -ForegroundColor Green
+    Write-Host $([char]0x221A) -ForegroundColor Green
 }
 catch [Exception] {
-    Write-Host $([char]0x274C) -ForegroundColor Red
+    Write-Host $([char]0x0078) -ForegroundColor Red
     Write-Host "Something went wrong:`n$($_.Exception.Message)"
     break
 }
@@ -72,10 +72,10 @@ $localProvider = Get-PackageProvider -Name NuGet -Force -ErrorAction SilentlyCon
 $remoteProvider = Find-PackageProvider -Name NuGet -Force -ErrorAction SilentlyContinue | select -First 1
 if ($localProvider -eq $null -or $remoteProvider.Version -gt $localProvider.Version) {
     $installPackageProvider = $true
-    Write-Host $([char]0x274C) -ForegroundColor Red
+    Write-Host $([char]0x0078) -ForegroundColor Red
 }
 else {
-    Write-Host $([char]0x2713) -ForegroundColor Green
+    Write-Host $([char]0x221A) -ForegroundColor Green
 }
 
 if ($installPackageProvider) {
@@ -83,10 +83,10 @@ if ($installPackageProvider) {
     try {
         Install-PackageProvider -Name NuGet -Force -ErrorAction Stop | Out-Null
         Write-Progress -Completed -Activity "*"
-        Write-Host $([char]0x2713) -ForegroundColor Green
+        Write-Host $([char]0x221A) -ForegroundColor Green
     }
     catch [Exception] {
-        Write-Host $([char]0x274C) -ForegroundColor Red
+        Write-Host $([char]0x0078) -ForegroundColor Red
         Write-Host "Something went wrong:`n$($_.Exception.Message)"
         break
     }
@@ -95,19 +95,19 @@ if ($installPackageProvider) {
 Write-Host "Check if PowerShellGet is present and updated...   " -NoNewline
 $updatePsGet = $false
 $installPsGet = $false
-$localPsGet = Get-Module -Name "PowerShellGet" -ErrorAction SilentlyContinue | select -First 1
+$localPsGet = Get-Module -Name "PowerShellGet" -ListAvailable -ErrorAction SilentlyContinue -Refresh | select -First 1
 $remotePsGet = Find-Module -Name "PowerShellGet" -ErrorAction SilentlyContinue | select -First 1
 
 if ($null -eq $localPsGet) {
     $installPsGet = $true
-    Write-Host $([char]0x274C) -ForegroundColor Red
+    Write-Host $([char]0x0078) -ForegroundColor Red
 }
 elseif ($remotePsGet.Version -gt $localPsGet.Version) {
     $updatePsGet = $true
-    Write-Host $([char]0x274C) -ForegroundColor Red
+    Write-Host $([char]0x0078) -ForegroundColor Red
 }
 else {
-    Write-Host $([char]0x2713) -ForegroundColor Green
+    Write-Host $([char]0x221A) -ForegroundColor Green
 }
 
 if ($installPsGet) {
@@ -117,7 +117,7 @@ if ($installPsGet) {
         Write-Progress -Activity "Installing package 'PowerShellGet'" -Completed
         Write-Progress -Activity "Installing package 'PackageManagement'" -Completed
 
-        Write-Host $([char]0x2713) -ForegroundColor Green
+        Write-Host $([char]0x221A) -ForegroundColor Green
     }
     catch [Exception] {
         $installPsGetManually = $true
@@ -130,7 +130,7 @@ elseif ($updatePsGet) {
         Write-Progress -Activity "Installing package 'PowerShellGet'" -Completed
         Write-Progress -Activity "Installing package 'PackageManagement'" -Completed
 
-        Write-Host $([char]0x2713) -ForegroundColor Green
+        Write-Host $([char]0x221A) -ForegroundColor Green
     }
     catch [Exception] {
         $installPsGetManually = $true
@@ -150,10 +150,10 @@ if ($installPsGetManually) {
             Remove-Item "$($targetDir)\*" -Recurse -Force | Out-Null
             Copy-Item "$($workingDir)\$($_)\*\*" "$($targetDir)\" -Recurse -Force | Out-Null
         }
-        Write-Host $([char]0x2713) -ForegroundColor Green
+        Write-Host $([char]0x221A) -ForegroundColor Green
     }
     catch [Exception] {
-        Write-Host $([char]0x274C) -ForegroundColor Red
+        Write-Host $([char]0x0078) -ForegroundColor Red
         Write-Host "Something went wrong:`n$($_.Exception.Message)"
         break
     }
@@ -174,10 +174,10 @@ try {
         Set-PSRepository -Name $psGalleryProvider.Name -InstallationPolicy "Trusted"
         Write-Progress -Completed -Activity "*"
     }
-    Write-Host $([char]0x2713) -ForegroundColor Green
+    Write-Host $([char]0x221A) -ForegroundColor Green
 }
 catch [Exception] {
-    Write-Host $([char]0x274C)
+    Write-Host $([char]0x0078)
     Write-Host "Something went wrong:`n$($_.Exception.Message)"
     break
 }

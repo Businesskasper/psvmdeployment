@@ -19,9 +19,9 @@ try {
     $latestAsset = $latestRequest.assets | ? { $_.content_type -eq "application/executable" -and $_.name -like "*64-bit.exe" } | select -First 1
     
     Invoke-WebRequest -Method Get -Uri $latestAsset.browser_download_url -UseBasicParsing -OutFile "$($root)\setup.exe"
-    Write-Host $([char]0x2713) -ForegroundColor Green 
+    Write-Host $([char]0x221A) -ForegroundColor Green 
 }
 catch [Exception] {
-    Write-Host $([char]0x274C) -ForegroundColor Red
+    Write-Host $([char]0x0078) -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
 }

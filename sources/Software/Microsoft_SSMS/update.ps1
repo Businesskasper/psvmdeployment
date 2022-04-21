@@ -17,9 +17,9 @@ try {
     
     Invoke-WebRequest -Method Get -Uri "https://aka.ms/ssmsfullsetup" -OutFile $setupPath
 
-    Write-Host $([char]0x2713) -ForegroundColor Green 
+    Write-Host $([char]0x221A) -ForegroundColor Green 
 }
 catch [Exception] {
-    Write-Host $([char]0x274C) -ForegroundColor Red
+    Write-Host $([char]0x0078) -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
 }
