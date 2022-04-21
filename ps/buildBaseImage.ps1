@@ -1,16 +1,13 @@
 ﻿param(
-    #[string]$isoPath = 'C:\Hyper-V\psvmdeployment\sources\Images\en_windows_server_2019_updated_nov_2020_x64_dvd_8600b05f.iso',
-    [string]$isoPath = 'C:\Hyper-V\psvmdeployment\sources\Images\en_window_server_version_20h2_updated_nov_2020_x64_dvd_26fe579c.iso',
+    [string]$isoPath = 'C:\Hyper-V\psvmdeployment\sources\Images\en_windows_server_2019_updated_nov_2020_x64_dvd_8600b05f.iso',
 
     [ValidateSet('Windows Server', 'Windows 10')]
     [string]$Product = 'Windows Server',
 
     [ValidateSet('Standard', 'Datacenter', 'Standard (Desktop Experience)')]
-    #[string]$SKU = 'Standard (Desktop Experience)',
-    [string]$SKU = 'Standard',
+    [string]$SKU = 'Standard (Desktop Experience)',
 
-    #[string]$Version = '2019'
-    [string]$Version = '20H2',
+    [string]$Version = '2019',
      
     [boolean]$InstallLatestCU = $false
 )
@@ -29,7 +26,9 @@ else {
 
 . $root\functions.ps1
 
-$workingDir = "$($root)\$([guid]::NewGuid())"
+$isoDir = $isoPath | Split-Path -Parent
+
+$workingDir = "$($isoDir)\$([guid]::NewGuid())"
 Write-Host "Prepare working directory in `"$($workingDir)`""
 md $workingDir -ea 0 | Out-Null
 
@@ -118,7 +117,7 @@ Enable-WindowsOptionalFeature -FeatureName NetFx3 -Path "$($osPartition.DriveLet
 
 if (-not ([String]::IsNullOrWhitespace($updatePath))) {
     Write-Host "Apply latest patch"
-    Add-WindowsPackage -PackagePath $updatePath -Path "$($osPartition.DriveLetter):" -PreventPending -LogPath "$($root)\dism.log" -LogLevel Debug | Out-Null
+    Add-WindowsPackage -PackagePath $updatePath -Path "$($osPartition.DriveLetter):" -PreventPending -LogPath "$($workingDir)\dism.log" -LogLevel Debug | Out-Null
 }
 
 Write-Host "Zero and clean free space"
@@ -145,5 +144,5 @@ Write-Host "Cleanup"
 if ($isForcedEncryptionEnabled) {
     SetItemProperty -path $forcedEncryptionKey -name "FDVDenyWriteAccess" -type DWORD -value 1
 }
-Move-Item -Path $vhdxPath -Destination $root -Force -Confirm:$false
+Move-Item -Path $vhdxPath -Destination $isoDir -Force -Confirm:$false
 Remove-Item -Path $workingDir -Force -Recurse -Confirm:$false
