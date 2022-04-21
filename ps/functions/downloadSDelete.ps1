@@ -8,7 +8,9 @@ function DownloadSDelete([string]$installDir) {
     md $installDir -ea 0 | Out-Null
     $sdeleteZipPath = [System.IO.Path]::combine($installDir, "sdelete.zip")
     [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
+    $ProgressPreference = "SilentlyContinue"
     Invoke-WebRequest -method Get -uri "https://download.sysinternals.com/files/SDelete.zip" -outfile $sdeleteZipPath | Out-Null
+    $ProgressPreference = "Continue"
        
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     [System.IO.Compression.ZipFile]::ExtractToDirectory($sdeleteZipPath, $installDir)

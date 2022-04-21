@@ -17,8 +17,6 @@ else {
     }
 }
 
-Write-Host ([Environment]::NewLine)
-
 Write-Host "Check if Hyper-V service and module are installed...   " -NoNewLine
 $installHyperV = $false
 $hvModule = Get-Module -ListAvailable Hyper-V -ErrorAction SilentlyContinue
@@ -41,6 +39,7 @@ else {
 if ($installHyperV) {
     Write-Host "Install Hyper-V...   " -NoNewline
     try {
+        $ProgressPreference = "SilentlyContinue"
         $hyperVSetup = Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -NoRestart -ErrorAction Stop | Out-Null
         Write-Progress -Completed -Activity "*"
         Write-Host $([char]0x221A) -ForegroundColor Green
@@ -52,6 +51,9 @@ if ($installHyperV) {
         Write-Host $([char]0x0078) -ForegroundColor Red
         Write-Host "Something went wrong:`n$($_.Exception.Message)"
         break
+    }
+    finally {
+        $ProgressPreference = "Continue"
     }
 }
 
@@ -68,8 +70,10 @@ catch [Exception] {
 
 Write-Host "Check if the default Package Provider is present and updated...   " -NoNewline
 $installPackageProvider = $false
+$ProgressPreference = "SilentlyContinue"
 $localProvider = Get-PackageProvider -Name NuGet -Force -ErrorAction SilentlyContinue | select -First 1
 $remoteProvider = Find-PackageProvider -Name NuGet -Force -ErrorAction SilentlyContinue | select -First 1
+$ProgressPreference = "Continue"
 if ($localProvider -eq $null -or $remoteProvider.Version -gt $localProvider.Version) {
     $installPackageProvider = $true
     Write-Host $([char]0x0078) -ForegroundColor Red
@@ -81,6 +85,7 @@ else {
 if ($installPackageProvider) {
     Write-Host "Install the default Package Provider...   " -NoNewline
     try {
+        $ProgressPreference = "SilentlyContinue"
         Install-PackageProvider -Name NuGet -Force -ErrorAction Stop | Out-Null
         Write-Progress -Completed -Activity "*"
         Write-Host $([char]0x221A) -ForegroundColor Green
@@ -90,13 +95,18 @@ if ($installPackageProvider) {
         Write-Host "Something went wrong:`n$($_.Exception.Message)"
         break
     }
+    finally {
+        $ProgressPreference = "Continue"
+    }
 }
 
 Write-Host "Check if PowerShellGet is present and updated...   " -NoNewline
 $updatePsGet = $false
 $installPsGet = $false
+$ProgressPreference = "SilentlyContinue"
 $localPsGet = Get-Module -Name "PowerShellGet" -ListAvailable -ErrorAction SilentlyContinue -Refresh | select -First 1
 $remotePsGet = Find-Module -Name "PowerShellGet" -ErrorAction SilentlyContinue | select -First 1
+$ProgressPreference = "Continue"
 
 if ($null -eq $localPsGet) {
     $installPsGet = $true
@@ -113,6 +123,7 @@ else {
 if ($installPsGet) {
     try {
         Write-Host "Install PowerShellGet...   " -NoNewline
+        $ProgressPreference = "SilentlyContinue"
         Install-Module -Name PowerShellGet -SkipPublisherCheck -Force -ErrorAction Stop  | Out-Null
         Write-Progress -Activity "Installing package 'PowerShellGet'" -Completed
         Write-Progress -Activity "Installing package 'PackageManagement'" -Completed
@@ -122,10 +133,14 @@ if ($installPsGet) {
     catch [Exception] {
         $installPsGetManually = $true
     }
+    finally {
+        $ProgressPreference = "Continue"
+    }
 }
 elseif ($updatePsGet) {
     try {
         Write-Host "Update PowerShellGet...   " -NoNewline
+        $ProgressPreference = "SilentlyContinue"
         Update-Module -Name PowerShellGet  -Force -ErrorAction Stop | Out-Null
         Write-Progress -Activity "Installing package 'PowerShellGet'" -Completed
         Write-Progress -Activity "Installing package 'PackageManagement'" -Completed
@@ -135,6 +150,9 @@ elseif ($updatePsGet) {
     catch [Exception] {
         $installPsGetManually = $true
     }
+    finally {
+        $ProgressPreference = "Continue"
+    }
 }
 
 if ($installPsGetManually) {
@@ -142,6 +160,7 @@ if ($installPsGetManually) {
     New-Item -ItemType Directory -Path $workingDir -ErrorAction SilentlyContinue | Out-Null
     try {
         Save-Module -Name PowerShellGet -Path $workingDir -Repository PSGallery
+        $ProgressPreference = "SilentlyContinue"
         Write-Progress -Activity "Installing package 'PowerShellGet'" -Completed
         Write-Progress -Activity "Installing package 'PackageManagement'" -Completed
 
@@ -158,6 +177,7 @@ if ($installPsGetManually) {
         break
     }
     finally {
+        $ProgressPreference = "Continue"
         Remove-Item -Path $workingDir -Force -ErrorAction SilentlyContinue -Recurse | Out-Null
     }
 }
@@ -165,6 +185,7 @@ if ($installPsGetManually) {
 Write-Host "Register PSGallery and set as trusted default provider...   " -NoNewline
 try {
     [System.Net.WebClient]::new().Proxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials
+    $ProgressPreference = "SilentlyContinue"
     $psGalleryProvider = Get-PSRepository | ? {$_.SourceLocation -eq "https://www.powershellgallery.com/api/v2" } | select -first 1
     if ($null -eq $psGalleryProvider) {
         Register-PSRepository -Default -InstallationPolicy Trusted
@@ -180,6 +201,9 @@ catch [Exception] {
     Write-Host $([char]0x0078)
     Write-Host "Something went wrong:`n$($_.Exception.Message)"
     break
+}
+finally {
+    $ProgressPreference = "Continue"
 }
 
 if ($hyperVSetup.RestartNeeded) {

@@ -13,6 +13,8 @@ else {
 Write-Host "Update `"SQL Server 2019 Developer Edition`"...   " -NoNewLine
 
 try {
+    $ProgressPreference = "SilentlyContinue"
+
     Remove-Item -Path $root\* -Recurse -Exclude "update.ps1" -Force
     
     $isoPath = [System.IO.Path]::Combine($root, "SQLServer2019-x64-ENU-Dev.iso")
@@ -33,4 +35,7 @@ try {
 catch [Exception] {
     Write-Host $([char]0x0078) -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
+}
+finally {
+    $ProgressPreference = "Continue"
 }

@@ -13,6 +13,7 @@ else {
 Write-Host "Update `"Chrome`"...   " -NoNewLine
 
 try {
+    $ProgressPreference = "SilentlyContinue"
     Remove-Item -Path "$root\*" -Recurse -Force -Exclude @("AppAssociations.xml", "update.ps1") -Confirm:$false
     
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -33,4 +34,7 @@ try {
 catch [Exception] {
     Write-Host $([char]0x0078) -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
+}
+finally {
+    $ProgressPreference = "Continue"
 }

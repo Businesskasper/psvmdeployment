@@ -13,6 +13,8 @@ else {
 Write-Host "Update `"Visual Studio 2019 Professional`"...   " -NoNewline
 
 try {
+    $ProgressPreference = "SilentlyContinue"
+
     Remove-Item -Path $root -Exclude @("update.ps1", "install.ps1", "certmgr.exe") -Recurse -Force -Confirm:$false
     
     $setupFile = [System.IO.Path]::Combine($root, "vs_professional.exe")
@@ -38,4 +40,7 @@ try {
 catch [Exception] {
     Write-Host $([char]0x0078) -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
+}
+finally {
+    $ProgressPreference = "Continue"
 }

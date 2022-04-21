@@ -13,6 +13,8 @@ else {
 Write-Host "Update `"Visual Studio Code`"...   "
 
 try {
+    $ProgressPreference = "SilentlyContinue"
+
     $setupPath = [System.IO.Path]::Combine($root, "setup.exe")
     
     [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
@@ -23,4 +25,7 @@ try {
 catch [Exception] {
     Write-Host $([char]0x0078) -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
+}
+finally {
+    $ProgressPreference = "Continue"
 }

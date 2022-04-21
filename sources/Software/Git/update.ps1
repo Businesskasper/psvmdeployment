@@ -13,6 +13,8 @@ else {
 Write-Host "Update `"Git`"...   " -NoNewline
 
 try {
+    $ProgressPreference = "SilentlyContinue"
+
     Remove-Item -Path "$($root)\*" -Exclude @("install.ps1", "update.ps1") -Recurse -Force -Confirm:$false
     
     [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
@@ -26,4 +28,7 @@ try {
 catch [Exception] {
     Write-Host $([char]0x0078) -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
+}
+finally {
+    $ProgressPreference = "Continue"
 }
