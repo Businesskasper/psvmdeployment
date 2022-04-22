@@ -10,7 +10,7 @@ else {
     }
 }
 
-Write-Host "Update `"Node.js`"...   "
+Write-Host "Update `"Node.js`"...   " -NoNewline
 
 try {
     $ProgressPreference = "SilentlyContinue"
