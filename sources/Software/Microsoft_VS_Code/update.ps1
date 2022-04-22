@@ -10,7 +10,7 @@ else {
     }
 }
 
-Write-Host "Update `"Visual Studio Code`"...   "
+Write-Host "Update `"Visual Studio Code`"...   " -NoNewline
 
 try {
     $ProgressPreference = "SilentlyContinue"

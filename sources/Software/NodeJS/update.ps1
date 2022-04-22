@@ -30,17 +30,17 @@ try {
     
     # Download latest stable
     $latestStable = $versionsByMajor[0].Group | select -First 1
-    Write-Host "Download latest stable: $($latestStable.version)"
+    Write-Progress -Activity "Download Node.js" -Status "Latest Stable: $($latestStable.version)" -PercentComplete 0
     $downloadPath = New-Item -Path $root -Name LatestStable -ItemType Directory -Force
     [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
     Invoke-WebRequest -Uri "https://nodejs.org/dist/v$($latestStable.version.ToString())/node-v$($latestStable.version.ToString())-x64.msi" -OutFile ([System.IO.Path]::Combine($downloadPath.FullName, "node-LatestStable-x64.msi")) -UseBasicParsing              
     
     # Download LTS versions per major release
-    $versionsByMajor | % {
+    for ($i = 0; $i -lt $versionsByMajor.Count; $i++) {
         $lts = $_.Group | select -First 1
-    
-        Write-Host "Download $($lts.version)"
-    
+        
+        Write-Progress -Activity "Download Node.js" -Status $lts.version -PercentComplete (100 / $versionsByMajor.Count * $i)
+       
         $downloadPath = New-Item -Path $root -Name $($lts.version.ToString().TrimStart("v")) -ItemType Directory -Force
         [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
         Invoke-WebRequest -Uri "https://nodejs.org/dist/v$($lts.version.ToString())/node-v$($lts.version.ToString())-x64.msi" -OutFile ([System.IO.Path]::Combine($downloadPath.FullName, "node-v$($lts.version.ToString())-x64.msi")) -UseBasicParsing
