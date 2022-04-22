@@ -1,15 +1,21 @@
-﻿param(
+﻿[CmdletBinding(DefaultParametersetName='None')] 
+param(
+    [Parameter(Mandatory=$true)]
     [string]$isoPath = 'C:\Hyper-V\psvmdeployment\sources\Images\en_windows_server_2019_updated_nov_2020_x64_dvd_8600b05f.iso',
 
-    [ValidateSet('Windows Server', 'Windows 10')]
-    [string]$Product = 'Windows Server',
-
+    [Parameter(Mandatory=$true)]
     [ValidateSet('Standard', 'Datacenter', 'Standard (Desktop Experience)')]
     [string]$SKU = 'Standard (Desktop Experience)',
 
-    [string]$Version = '2019',
-     
-    [boolean]$InstallLatestCU = $false
+    [Parameter(ParameterSetName="Update")]
+    [Switch]$InstallLatestCU,
+
+    [Parameter(ParameterSetName="Update", Mandatory=$true)]
+    [ValidateSet('Windows Server', 'Windows 10')]
+    [string]$Product = 'Windows Server',
+
+    [Parameter(ParameterSetName="Update", Mandatory=$true)]
+    [string]$Version = '2019'  
 )
 
 if ($psISE) {
@@ -43,7 +49,7 @@ Write-Host "Download sdelete"
 $sdeleteDir = "$($workingDir)\sdelete"
 $sdeletePath = DownloadSDelete -installDir $sdeleteDir
 
-if ($InstallLatestCU) {
+if ($InstallLatestCU.IsPresent) {
     if ($null -eq (Get-Module -Name kbupdate -ListAvailable)) {
         Write-Host "Install kbupdate module"
         Install-Module kbupdate -ErrorAction Stop -Force
