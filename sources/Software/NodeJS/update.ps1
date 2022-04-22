@@ -43,7 +43,9 @@ try {
        
         $downloadPath = New-Item -Path $root -Name $($lts.version.ToString().TrimStart("v")) -ItemType Directory -Force
         [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
+        $ProgressPreference = "SilentlyContinue"
         Invoke-WebRequest -Uri "https://nodejs.org/dist/v$($lts.version.ToString())/node-v$($lts.version.ToString())-x64.msi" -OutFile ([System.IO.Path]::Combine($downloadPath.FullName, "node-v$($lts.version.ToString())-x64.msi")) -UseBasicParsing
+        $ProgressPreference = "Continue"
     }
 
     Write-Progress -Activity "Node.js" -Completed
