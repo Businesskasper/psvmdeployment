@@ -1,6 +1,6 @@
 # Define Nodes
 
-Nodes (or virtual machines) can be defined in [nodeDefinition.ps1](../nodeDefinition.ps1).
+Nodes can be defined in [nodeDefinition.ps1](../nodeDefinition.ps1).
 
 The file returns a hashtable with one key targeting all nodes (```NodeName = "*"```) and another key per node. Examples can be found in the ```examples``` directory.
 
@@ -27,5 +27,3 @@ A node can be configured using following properties:
 |NICs|no|Array of [NIC's](../ps/classes.ps1) to assign to the vm. If one provided nic does not exist, it will be created during deployment|
 |Export|no|If set to true, a task will be installed to the node which restores its network configuration on reboot. This is done because the network config would be lost when the virtual machine is exported and imported again|
 |JoinDomain|no|If set to true, the device is joined to the Domain provided in ```DomainName```. The deployment waits for the DC node to complete and the domain to become available|
-
-You can define own properties and retrieve them inside [playbook.ps1](../playbook.ps1).

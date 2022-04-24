@@ -1,27 +1,27 @@
 # Define apps and roles
 
-Nodes (or virtual machines) are defined in [nodeDefinition.ps1](../nodeDefinition.ps1).
+Nodes are defined in [nodeDefinition.ps1](../nodeDefinition.ps1).
 A node consists of a name, general configuration data, roles and apps. 
 
-Depending on a roles nodes, configuration blocks in [playbook.ps1](../playbook.ps1) are applied to the node.
+Depending on its roles, configuration blocks in [playbook.ps1](../playbook.ps1) are applied to the node.
 
-Apps can be mapped to a specific role or to directly to a node in [nodeDefinition.ps1](../nodeDefinition.ps1).
+Apps can be mapped to a specific role or directly to a node in [nodeDefinition.ps1](../nodeDefinition.ps1).
 
 For example: Role "SQL" may contain the applications "Microsoft SQL Server 2019" and "SQL Server Management Studio", the apps setup binaries, required powershell modules and a section in [playbook.ps1](../playbook.ps1) which installs the apps and configures the sql service to run after boot.
 
-Check [the next section](5_define_nodes.md) on how to apply created apps and roles to nodes.
+The [next section](5_define_nodes.md) convers how to apply apps and roles to a node.
 
 ## Define an app
 
-Apps can be added as an Object of type [Application](../ps/classes.ps1) to the "Applications" array in [roles.ps1](../ps/roles.ps1).
+Apps can be added as Objects of type [Application](../ps/classes.ps1?plain=1#L11) to the "Applications" array in [roles.ps1](../ps/roles.ps1).
 
 An Application consists of following properties:
 
 |Property|Description|
 |--------|-----------|
-|```InstallType```|MSI or EXE - choose msi if your setup binary is an msi file|
+|```InstallType```|MSI or EXE - depending on the setup file|
 |```AppName```|The display name of the app for logging|
-|```SourcePath```|Mapping of the binary paths. Object of type [Binary](../ps/classes.ps1) with ```Source``` -> location of the files on the host and ```Destination``` -> where the files should be copied to on the target node|
+|```SourcePath```|Mapping of the binary paths. Object of type [Binary](../ps/classes.ps1?plain=1#L6) with ```Source``` location of the files on the host and the ```Destination``` where the files should be copied to on the target node|
 |```BinaryPath```|Path to the setup executable. Will typically be an exe or msi file inside the ```Destination``` prop of ```SourcePath```.
 |```Arguments```|Array of arguments to be executed with the ```BinaryPath```|
 |```ExitCodes```|Array of exit codes the setup is allowed to exit with. Typically 0 (success) and 3010 (reboot required)|
@@ -58,7 +58,7 @@ A NodeRole consists of following properties:
 |Property|Description|
 |--------|-----------|
 |Name|The name of the role which is used for mapping to its configuration block|
-|Applications|An array of Applications which should be installed. Applications can  also be added explicitly as inside the roles configuration section|
+|Applications|An array of Applications which should be installed. Applications can also be added explicitly as inside the roles configuration section|
 |DscModules|Array of [PsModule](../ps/classes.ps1). Modules specified here will be copied to the nodes module directory. If the modules are not found inside the ```modules``` directory, they will be downloaded using PowerShellGet|
 |Files|Folders to be copied to the node. Array of [Binary](../ps/classes.ps1)|
 

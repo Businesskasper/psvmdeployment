@@ -1,15 +1,17 @@
 # Build a base image
 
-You need at least one sysprepped VHDX with an installed operating system to serve as a base for our VMs.
-You can either build a base image yourself using [sysprep](https://docs.microsoft.com/de-de/windows-hardware/manufacture/desktop/sysprep--system-preparation--overview), or you can use [buildBaseImage.ps1](../sources/Images/buildBaseImage.ps1). 
+At least one [sysprepped](https://docs.microsoft.com/de-de/windows-hardware/manufacture/desktop/sysprep--system-preparation--overview) VHDX with an installed but not configured operating system is required as base the virtual machines.
+This process can be automated by invoking [buildBaseImage.ps1](../ps/buildBaseImage.ps1).
 
 The script will 
-- Build a bootable .VHDX with the ISOs OS preinstalled (but not yet configured)
-- Get the latest cumulative update and apply it to the virtual drive
-- Enable Net Framework 3.5 (since it's still required by many apps and products)
-- Shrink the virtual hard disk to its absolute minimum size using (sdelete)[] and (Optimize-VHD)[]
+- Build a bootable VHDX with the ISOs OS preinstalled (but not yet configured).
+- (Optionally) Get the latest cumulative update and apply it to the virtual drive.
+- Enable Net Framework 3.5 (since it's still required by many apps and products).
+- Shrink the virtual hard disk to its absolute minimum size using [sdelete](https://docs.microsoft.com/en-us/sysinternals/downloads/sdelete) and [Optimize-VHD](https://docs.microsoft.com/en-us/powershell/module/hyper-v/optimize-vhd?view=windowsserver2022-ps).
+- Place the resulting VHDX in the same directory as the provided ISO. The file may then be moved to [.\sources\Images](./sources/Images).
 
-After you downloaded your prefered ISO (e.g. Windows Server 2019) place the file in sources/Images and invoke the build script:
-``.\buildBaseImage.ps1 -isoPath 'c:\hyper-v\psvmdeployment\sources\Images\server_2019.iso' -Product 'Windows Server' -SKU 'Standard (Desktop Experience)' -Version 2019``
+Example without installing the latest cumulative update:
+``.\ps\buildBaseImage.ps1 -isoPath 'c:\hyper-v\psvmdeployment\sources\Images\server_2019.iso' -SKU 'Standard (Desktop Experience)'``
 
-As a result, the script will place the generated .VHDX file inside the same folder.
+Example including installing the latest cumulative update:
+``.\ps\buildBaseImage.ps1 -isoPath 'c:\hyper-v\psvmdeployment\sources\Images\server_2019.iso' -SKU 'Standard (Desktop Experience)' -InstallLatestCU -Product 'Windows Server' -Version 2019``

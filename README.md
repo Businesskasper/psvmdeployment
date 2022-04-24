@@ -1,7 +1,7 @@
 # psvmdeployment
-I use this project to deploy virtual environments on my local machine using hyper-v, powershell and desired state configuration. This includes automated updating of the deployment workbench and creating base images, building role based declarative environment configurations and the deploying and state monitoring the virtual machines.
+Automated vm deployment using Hyper-V, Powershell and Desired State Configuration. Includes tooling for automated updating of the deployment bench, creation of base images, building of role based, declarative environment configurations and the deployment and state monitoring of the virtual machines.
 
-The setup is built around [Powershell DSC](https://docs.microsoft.com/de-de/powershell/dsc/overview?view=dsc-1.1). If you invoke ``run.ps1``, the defined roles and applications in [ps/roles.ps1](ps/roles.ps1) are built. Then configData.ps1 is parsed (as described [here](https://docs.microsoft.com/de-de/powershell/dsc/configurations/configdata?view=dsc-1.1)) and DSC Configurations are created. For each dsc node configuration a corresponding vm is deployed.<br><br>
+The setup is built around [Powershell DSC](https://docs.microsoft.com/de-de/powershell/dsc/overview?view=dsc-1.1). After invoking [run.ps1](./run.ps1), all defined apps, roles and DSC config data and configuration get parsed. Each node is deployed and injected with its configuration and all required modules and binaries. <br><br>
 
 ## Getting started
 1. [Install prerequisites](docs/1_prerequisites.md)
