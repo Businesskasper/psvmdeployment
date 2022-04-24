@@ -2,7 +2,7 @@
     RootModule           = 'xDSCHelper.psm1'
 
     # Die Versionsnummer dieses Moduls
-    ModuleVersion        = '1.0'
+    ModuleVersion        = '1.2'
 
     # ID zur eindeutigen Kennzeichnung dieses Moduls
     GUID                 = 'eb908afa-533b-4fa2-b79c-b15a7374c69c'
@@ -17,7 +17,7 @@
     Copyright            = ''
 
     # Beschreibung der von diesem Modul bereitgestellten Funktionen
-    Description          = 'Installiert ein .exe Setup'
+    Description          = 'Multiple helper functions - not enough for own modules'
 
     # Die für dieses Modul mindestens erforderliche Version des Windows PowerShell-Moduls
     PowerShellVersion    = '5.0'
@@ -35,7 +35,7 @@
     AliasesToExport      = '*'
 
     # Aus diesem Modul zu exportierende DSC-Ressourcen
-    DscResourcesToExport = @('xLogRole', 'xLogRoleStatus', 'xVmNetConfig', 'xJoinDomain')
+    DscResourcesToExport = @('xLogRole', 'xLogRoleStatus', 'xVmNetConfig', 'xJoinDomain', 'xReboot')
 
 }
 

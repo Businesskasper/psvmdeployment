@@ -8,14 +8,13 @@
     Import-DscResource -ModuleName xInstallExe -ModuleVersion 1.2
     Import-DscResource -ModuleName xRemoteDesktopAdmin -ModuleVersion 1.1.0.0
     Import-DscResource -ModuleName xWinEventLog -ModuleVersion 1.2.0.0
-    Import-DscResource -ModuleName xDSCHelper -ModuleVersion 1.0
+    Import-DscResource -ModuleName xDSCHelper -ModuleVersion 1.2
     Import-DscResource -ModuleName xActiveDirectory -ModuleVersion 2.22.0.0
     Import-DscResource -ModuleName xNodeJS -ModuleVersion 1.0
 
-
     # Settings for all nodes
     Node $AllNodes.NodeName {
-        
+
         # Enable DSC analytic log
         xWinEventLog DSCAnalyticLog {
             LogName   = 'Microsoft-Windows-Dsc/Analytic'
@@ -134,19 +133,9 @@
             SafemodeAdministratorPassword = $node.LocalCredentials
         }  
         
-        Script RebootDomain {
-            TestScript = {
-                return (Test-Path HKLM:\SOFTWARE\DSC\RebootDomain)
-            }
-            SetScript  = {
-                New-Item -Path HKLM:\SOFTWARE\DSC\RebootDomain -Force
-                $global:DSCMachineStatus = 1 
-            }
-            GetScript  = { 
-                return @{
-                    Result = $(Test-Path "HKLM:\SOFTWARE\DSC\RebootDomain")
-                }
-            }
+        xReboot DomainReboot {
+            Key = "Domain"
+            DependsOn = '[xADDomain]DC'
         }
     }
     
@@ -196,19 +185,8 @@
             }
         }
 
-        Script RebootSQL {
-            TestScript = {
-                return (Test-Path HKLM:\SOFTWARE\DSC\RebootSQL)
-            }
-            SetScript  = {
-                New-Item -Path HKLM:\SOFTWARE\DSC\RebootSQL -Force
-                $global:DSCMachineStatus = 1 
-            }
-            GetScript  = { 
-                return @{
-                    Result = $(Test-Path "HKLM:\SOFTWARE\DSC\RebootSQL")
-                }
-            }
+        xReboot DomainReboot {
+            Key = "SQL"
         }
     } 
 
@@ -266,19 +244,8 @@
             TestPath   = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9EACB46-9179-3C2D-A196-62006713EC8E}'
         }
 
-        Script RebootDEV {
-            TestScript = {
-                return (Test-Path HKLM:\SOFTWARE\DSC\RebootDEV)
-            }
-            SetScript  = {
-                New-Item -Path HKLM:\SOFTWARE\DSC\RebootDEV -Force
-                $global:DSCMachineStatus = 1 
-            }
-            GetScript  = { 
-                return @{
-                    Result = $(Test-Path "HKLM:\SOFTWARE\DSC\RebootDEV")
-                }
-            }
+        xReboot DomainReboot {
+            Key = "DEV"
         }
     }
 
@@ -286,14 +253,14 @@
     Node $AllNodes.Where({ $_.Applications -ne $null -and $_.Applications.Count -ne 0 }).NodeName {
 
         $node.Applications.foreach({
-                xInstallExe $($_.AppName) {
-                    Ensure     = 'Present'
-                    AppName    = $($_.AppName)
-                    Arguments  = $($_.Arguments)
-                    BinaryPath = $($_.BinaryPath)
-                    ExitCodes  = $($_.ExitCodes)
-                    TestPath   = $($_.TestPath)
-                }
-            })
+            xInstallExe $($_.AppName) {
+                Ensure     = 'Present'
+                AppName    = $($_.AppName)
+                Arguments  = $($_.Arguments)
+                BinaryPath = $($_.BinaryPath)
+                ExitCodes  = $($_.ExitCodes)
+                TestPath   = $($_.TestPath)
+            }
+        })
     }
 }

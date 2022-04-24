@@ -162,122 +162,25 @@ class xJoinDomain {
     }    
 }
 
-
-function Write-InformationLog([string]$source, [System.Diagnostics.EventLogEntryType]$entryType, [string]$message) {
-    New-EventLog –LogName Application –Source $source -ErrorAction SilentlyContinue
-    Write-EventLog -LogName Application -Source $source -EntryType $entryType -EventId 1337 -Message $message
-}
-
 [DscResource()]
-class xRestoreSqlDatabase {
+class xReboot {
     [DscProperty(Key)]
-    [string]$Role
+    [string]$Key
 
-    [DscProperty(Mandatory)]
-    [string]$Server
-
-    [DscProperty(Mandatory)]
-    [string]$Instance
-
-    [DscProperty(Mandatory)]
-    [string]$BackupPath
-
-    [DscProperty(Mandatory)]
-    [string]$DatabaseName
-
-    [DscProperty()]
-    [PSCredential]$SqlUser
-
-    [Microsoft.SqlServer.Management.Smo.SqlSmoObject] $ServerConnection
-    
     [void] Set() {
-        $this.ConnectToServer()
-        
-        $dataFolder = $this.ServerConnection.Settings.DefaultFile
-        $logFolder = $this.ServerConnection.Settings.DefaultLog
-
-        if ($dataFolder.Length -eq 0) {
-            $dataFolder = $this.ServerConnection.Information.MasterDBPath
-        }
-
-        if ($logFolder.Length -eq 0) {
-            $logFolder = $this.ServerConnection.Information.MasterDBLogPath
-        }
-
-        $backupDeviceItem = [Microsoft.SqlServer.Management.Smo.BackupDeviceItem]::new($this.BackupPath, 'File')
-
-        $restore = [Microsoft.SqlServer.Management.Smo.Restore]@{ Database = $this.DatabaseName }
-        $restore.Devices.Add($backupDeviceItem)
-
-        $dataFileNumber = 0
-
-        foreach ($file in $restore.ReadFileList($this.ServerConnection)) {
-            $relocateFile = [Microsoft.SqlServer.Management.Smo.RelocateFile]@{ LogicalFileName = $file.LogicalName }
-
-            if ($file.Type -eq 'D') {
-                if ($dataFileNumber -ge 1) {
-                    $suffix = $dataFileNumber.ToString()
-                }
-                else {
-                    $suffix = $null
-                }
-
-                $relocateFile.PhysicalFileName = [System.IO.Path]::Combine($dataFolder, $this.DatabaseName + $suffix + ".mdf")
-
-                $dataFileNumber ++;
-            }
-            else {
-                $relocateFile.PhysicalFileName = [System.IO.Path]::Combine($logFolder, $this.DatabaseName + ".ldf")
-            }
-
-            $restore.RelocateFiles.Add($relocateFile) | out-null
-        }    
-
-        $restore.SqlRestore($this.ServerConnection)
+        New-Item -Path "HKLM:\SOFTWARE\DSC\$($this.Key)" -Force
+        $global:DSCMachineStatus = 1 
     }
 
     [bool] Test() {
-        return $this.IsCompliant()
+        return $(Test-Path HKLM:\SOFTWARE\DSC\RebootDomain)
     }
 
-    [xRestoreSqlDatabase] Get() {
+    [xReboot] Get() {
         return $this
     }
-
-    [void] ConnectToServer() {
-        if ($this.ServerConnection -ne $null) {    
-            return
-        }
-
-        [Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Management.Smo")
-
-        if ((Get-Module -Name sqlps) -eq $null) {
-            throw [Exception]::new("Could not load Sql Module")
-        }
-
-        try {
-            if ($this.Instance -eq $null -or $this.Instance -eq "" -or $this.Instance.ToUpper() -eq "MSSQLServer") {
-                $ServerInstance = $this.Server
-            }
-            else {
-                $ServerInstance = $this.Server + "\" + $this.Instance
-            }
-
-            if ($this.SqlUser -eq $null) {
-                $this.ServerConnection = [Microsoft.SqlServer.Management.Smo.Server]::new($ServerInstance)
-            }
-            else {
-                $this.ServerConnection = [Microsoft.SqlServer.Management.Smo.Server]::new($Serverinstance, $this.SqlUser.UserName, $this.SqlUser.Password)
-            }
-        }
-        catch {
-            Write-Host "Could not connect to Sql Server Instance"
-            throw
-        }
-    }
-
-    [bool] IsCompliant() {
-        $this.ConnectToServer()
-        return $this.ServerConnection.Databases.Where( { $_.Name -eq $this.DatabaseName } ).Count -eq 1
-    }
+}
+function Write-InformationLog([string]$source, [System.Diagnostics.EventLogEntryType]$entryType, [string]$message) {
+    New-EventLog –LogName Application –Source $source -ErrorAction SilentlyContinue
+    Write-EventLog -LogName Application -Source $source -EntryType $entryType -EventId 1337 -Message $message
 }
