@@ -17,9 +17,6 @@ return @{
             RAM          = 8192MB
             DiskSize     = 120GB
             Cores        = 4
-            Online       = $true
-            Export       = $false
-            JoinDomain   = $false
         }
     )
 }

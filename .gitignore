@@ -2,15 +2,15 @@ sources/Images/*
 sources/Software/*
 !sources/Software/*.ps1
 
-modules/ComputerManagementDsc
-modules/SqlServer
-modules/SqlServerDsc
-modules/xActiveDirectory
-modules/xDhcpServer
-modules/xDnsServer
-modules/xNetworking
-modules/xRemoteDesktopAdmin
-modules/xWebAdministration
-modules/xWinEventLog
+ps/modules/ComputerManagementDsc
+ps/modules/SqlServer
+ps/modules/SqlServerDsc
+ps/modules/xActiveDirectory
+ps/modules/xDhcpServer
+ps/modules/xDnsServer
+ps/modules/xNetworking
+ps/modules/xRemoteDesktopAdmin
+ps/modules/xWebAdministration
+ps/modules/xWinEventLog
 
 configuration/*.mof

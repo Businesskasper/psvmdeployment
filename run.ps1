@@ -57,7 +57,7 @@ foreach ($node in $configData.AllNodes) {
         -cores $node.Cores `
         -systemLocale $node.SystemLocale `
         -nics $node.NICS `
-        -online $node.Online `
+        -online ($node.Online -eq $true) `
         -adminPassword $node.LocalCredentials.GetNetworkCredential().Password `
         -psModules $node.Roles.DscModules
 

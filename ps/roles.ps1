@@ -1,22 +1,22 @@
 ﻿$Applications = @{
-    GoogleChrome       = [Application]@{
+    GoogleChrome = [Application]@{
         AppName    = "Google Chrome"
         Arguments  = "/i C:\Sources\Software\Google_Chrome\GoogleChromeStandaloneEnterprise64.msi /q"
         BinaryPath = "C:\Windows\System32\msiexec.exe"
         ExitCodes  = @(0)
-        SourcePath = @{
+        SourcePath = [Binary]@{
             Source      = "$($global:root)\Sources\Software\Google_Chrome"
             Destination = "C:\Sources\Software\Google_Chrome\"
         }
         TestPath   = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9EACB46-9179-3C2D-A196-62006713EC8E}"
     }
-    SSMS               = [Application]@{
+    SSMS = [Application]@{
         AppName     = "SQL Server Management Studio 18.0"
         Arguments   = @("/s")
         BinaryPath  = "C:\Sources\Software\Microsoft_SSMS\SSMS-Setup-ENU.exe"
         ExitCodes   = @(0, 3010)
         InstallType = [InstallType]::EXE
-        SourcePath  = @{
+        SourcePath  = [Binary]@{
             Source      = "$($global:root)\Sources\Software\Microsoft_SSMS"
             Destination = "C:\Sources\Software\Microsoft_SSMS\"
         }
@@ -25,13 +25,13 @@
         }
         TestPath    = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{673f06b0-3fd3-4b11-a775-3359fa5df604}"
     }
-    VSPro2019          = [Application]@{
+    VSPro2019 = [Application]@{
         AppName     = "Visual Studio 2019 Professional"
         Arguments   = @("C:\Sources\Software\Microsoft_VS_2019_Professional\install.ps1")
         BinaryPath  = "C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe"
         ExitCodes   = @(0, 3010)
         InstallType = [InstallType]::EXE
-        SourcePath  = @{
+        SourcePath  = [Binary]@{
             Source      = "$($global:root)\Sources\Software\Microsoft_VS_2019_Professional"
             Destination = "C:\Sources\Software\Microsoft_VS_2019_Professional\"
         }
@@ -40,13 +40,13 @@
         }
         TestPath    = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\83d3efc7"
     }
-    VSCode             = [Application]@{
+    VSCode = [Application]@{
         Arguments   = "C:\Sources\Software\Microsoft_VS_Code\install.ps1"
         AppName     = "VS Code 2019"
         BinaryPath  = "C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe"
         ExitCodes   = @(0, 3010)
         InstallType = [InstallType]::EXE
-        SourcePath  = @{
+        SourcePath  = [Binary]@{
             Source      = "$($global:root)\Sources\Software\Microsoft_VS_Code"
             Destination = "C:\Sources\Software\Microsoft_VS_Code\"
         }
@@ -61,31 +61,31 @@
         BinaryPath  = "C:\windows\system32\msiexec.exe"
         ExitCodes   = @(0, 3010)
         InstallType = [InstallType]::MSI
-        SourcePath  = @{
+        SourcePath  = [Binary]@{
             Source      = "$($global:root)\Sources\Software\NodeJS\LatestStable"
             Destination = "C:\Sources\Software\NodeJS\LatestStable\"
         }
         TestPath    = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{F62C0E94-FBB4-4009-9941-6271BD2EBCEF}"
     }
-    Git                = [Application]@{
+    Git = [Application]@{
         Arguments   = "/VERYSILENT"
         AppName     = "Git"
         BinaryPath  = "C:\Sources\Software\Git\setup.exe"
         ExitCodes   = @(0, 3010)
         InstallType = [InstallType]::EXE
-        SourcePath  = @{
+        SourcePath  = [Binary]@{
             Source      = "$($global:root)\Sources\Software\Git"
             Destination = "C:\Sources\Software\Git\"
         }
         TestPath    = "HKLM:\SOFTWARE\GitForWindows"
     }
-    MSSQL2019DEV       = [Application]@{
+    MSSQL2019DEV = [Application]@{
         Arguments   = "/Action=Install /FEATURES=SQLEngine /INSTANCENAME=MSSQLSERVER /SkipRules=RebootRequiredCheck /SQLSYSADMINACCOUNTS=Administrator /IAcceptSqlServerLicenseTerms /Q"
         AppName     = "MSSQL2019DEV"
         BinaryPath  = "C:\Sources\Software\Microsoft_SQL_Server_2019_Developer\setup.exe"
         ExitCodes   = @(0, 3010)
         InstallType = [InstallType]::EXE
-        SourcePath  = @{
+        SourcePath  = [Binary]@{
             Source      = "$($global:root)\Sources\Software\Microsoft_SQL_Server_2019_Developer"
             Destination = "C:\Sources\Software\Microsoft_SQL_Server_2019_Developer\"
         }
@@ -173,31 +173,31 @@ $NodeRoles = @{
     DEV = [NodeRole]@{
         Name         = "DEV"
         Files        = @(
-            @{
+            [Binary]@{
                 Source      = "$($global:root)\Sources\Software\Google_Chrome"
                 Destination = "C:\Sources\Software\Google_Chrome\"
             },
-            @{
+            [Binary]@{
                 Source      = "$($global:root)\Sources\Software\Microsoft_SSMS"
                 Destination = "C:\Sources\Software\Microsoft_SSMS\"
             },
-            @{
+            [Binary]@{
                 Source      = "$($global:root)\Sources\Software\Microsoft_VS_2019_Professional"
                 Destination = "C:\Sources\Software\Microsoft_VS_2019_Professional\"
             },
-            @{
+            [Binary]@{
                 Source      = "$($global:root)\Sources\Software\Microsoft_VS_Code"
                 Destination = "C:\Sources\Software\Microsoft_VS_Code\"
             },
-            @{
+            [Binary]@{
                 Source      = "$($global:root)\Sources\Software\NodeJS\LatestStable"
                 Destination = "C:\Sources\Software\NodeJS\LatestStable\"
             },
-            @{
+            [Binary]@{
                 Source      = "$($global:root)\Sources\Software\Git"
                 Destination = "C:\Sources\Software\Git\"
             },
-            @{
+            [Binary]@{
                 Source      = "$($global:root)\Sources\Software\Microsoft_SQL_Server_2019_Developer"
                 Destination = "C:\Sources\Software\Microsoft_SQL_Server_2019_Developer\"
             }

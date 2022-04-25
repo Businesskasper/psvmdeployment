@@ -51,7 +51,7 @@ return @{
                     DHCP       = $false
                 }
             )
-            Online     = $true
+            Online     = $false
             JoinDomain = $true
         }
     )
