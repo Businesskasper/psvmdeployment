@@ -6,17 +6,17 @@
 # 5. Registers PSGallery as default and trusted PowerShellGet Provider
 
 if (-not [String]::IsNullOrWhitespace($PSScriptRoot)) {
-    $root = $PSScriptRoot
+    $scriptRoot = $PSScriptRoot
 }
 elseif ($psISE) {
-    $root = $psISE.CurrentFile | select -ExpandProperty FullPath | Split-Path -Parent
+    $scriptRoot = $psISE.CurrentFile | select -ExpandProperty FullPath | Split-Path -Parent
 }
 else {
     if ($profile -match "VSCode") {
-        $root = $psEditor.GetEditorContext().CurrentFile.Path | Split-Path -Parent
+        $scriptRoot = $psEditor.GetEditorContext().CurrentFile.Path | Split-Path -Parent
     }
     else {
-        $root = $MyInvocation.MyCommand.Definition | Split-Path -Parent
+        $scriptRoot = $MyInvocation.MyCommand.Definition | Split-Path -Parent
     }
 }
 
@@ -159,7 +159,7 @@ elseif ($updatePsGet) {
 }
 
 if ($installPsGetManually) {
-    $workingDir = "$($root)\$([Guid]::NewGuid().Guid)"
+    $workingDir = "$($scriptRoot)\$([Guid]::NewGuid().Guid)"
     New-Item -ItemType Directory -Path $workingDir -ErrorAction SilentlyContinue | Out-Null
     try {
         Save-Module -Name PowerShellGet -Path $workingDir -Repository PSGallery
@@ -215,7 +215,7 @@ if ($hyperVSetup.RestartNeeded) {
 
 Write-Host "Install shipped DSC modules...   " -NoNewline
 try {
-    $modules = Get-ChildItem -Path "$($root)\modules" | ? {$_.Attributes -eq [System.IO.FileAttributes]::Directory }
+    $modules = Get-ChildItem -Path "$($scriptRoot)\modules" | ? {$_.Attributes -eq [System.IO.FileAttributes]::Directory }
     $modules | % { Copy-Item -Path $_.FullName -Container -Destination "$($env:ProgramFiles)\WindowsPowerShell\Modules" -Force -Recurse | Out-Null}
 
     Write-Host $([char]0x221A) -ForegroundColor Green
