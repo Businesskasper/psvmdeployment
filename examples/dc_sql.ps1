@@ -19,7 +19,6 @@ return @{
             RAM      = 2048MB
             DiskSize = 20GB
             Cores    = 2
-            Online   = $false
             NICs     = @(
                 @{
                     SwitchName = "ltw-local"
@@ -41,6 +40,7 @@ return @{
             DiskSize   = 40GB
             Cores      = 4
             Export     = $false
+            JoinDomain = $true
             NICs       = @(
                 @{
                     SwitchName = "ltw-local"
@@ -51,8 +51,6 @@ return @{
                     DHCP       = $false
                 }
             )
-            Online     = $false
-            JoinDomain = $true
         }
     )
 }
