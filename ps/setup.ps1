@@ -5,7 +5,10 @@
 # 4. Installs PowerShellGet
 # 5. Registers PSGallery as default and trusted PowerShellGet Provider
 
-if ($psISE) {
+if (-not [String]::IsNullOrWhitespace($PSScriptRoot)) {
+    $root = $PSScriptRoot
+}
+elseif ($psISE) {
     $root = $psISE.CurrentFile | select -ExpandProperty FullPath | Split-Path -Parent
 }
 else {
