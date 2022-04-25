@@ -29,7 +29,7 @@ DeleteItem -path "$configDir\*.*"
 # Deploy nodes
 $logJobs = @()
 foreach ($node in $configData.AllNodes) {
-    $existingNode = !(Get-VM -Name $($node.NodeName) -ErrorAction SilentlyContinue)
+    $existingNode = Get-VM -Name $($node.NodeName) -ErrorAction SilentlyContinue
     if ($null -ne $existingNode) {  
         Write-Host "$($node.NodeName) ist schon vorhanden. Überpringe.."
         continue
@@ -39,7 +39,7 @@ foreach ($node in $configData.AllNodes) {
         
     # Create NICs if necessary
     $node.NICS | ? { $_ -ne $null } | % { 
-        NewVMNic -name $_.SwitchName -type $_.SwitchType -nic $_.NIC
+        EnsureVMNic -name $_.SwitchName -type $_.SwitchType -nic $_.NIC
     }
 
     # Create and start vm
@@ -49,7 +49,7 @@ foreach ($node in $configData.AllNodes) {
     $vm = DeployVM -vmName $node.NodeName `
         -vhdxFile $node.VhdxPath `
         -organization $node.DomainName `
-        -dscFile $dscFiles | ? { $_.BaseName -eq $node.NodeName } | select -first 1 -expandProperty FullName `
+        -dscFile ($dscFiles | ? { $_.BaseName -eq $node.NodeName } | select -first 1 -expandProperty FullName) `
         -enableDSCReboot `
         -files $files `
         -ram $node.RAM `
@@ -58,6 +58,7 @@ foreach ($node in $configData.AllNodes) {
         -systemLocale $node.SystemLocale `
         -nics $node.NICS `
         -online $node.Online `
+        -adminPassword $node.LocalCredentials.GetNetworkCredential().Password `
         -psModules $node.Roles.DscModules
 
     Start-VM -VM $vm | Out-Null

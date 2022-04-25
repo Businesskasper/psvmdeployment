@@ -1,44 +1,33 @@
 function DeployVM {
 
     param (
-        [Parameter(Position = 1)]
         [string]$vmName,
 
-        [Parameter(Position = 2)]
         [string]$vhdxFile,
 
-        [Parameter(Position = 3)]
         [Array]$nics,
    
-        [Parameter(Position = 4)]
         [string]$dscFile,
 
-        [Parameter(Position = 5)]
         [PsModule[]]$psModules,
 
-        [Parameter(Position = 6)]
         [string]$organization,
 
-        [Parameter(Position = 7)]
-        [switch]$enableDSCReboot,
+        [Binary[]]$files,
 
-        [Parameter(Position = 8)]
-        [Array]$files,
-
-        [Parameter(Position = 9)]
         [int64]$ram,
 
-        [Parameter(Position = 10)]
         [int64]$diskSize,
 
-        [Parameter(Position = 11)]
         [int64]$cores,
 
-        [Parameter(Position = 12)]
         [string]$systemLocale,
 
-        [Parameter(Position = 13)]
-        [bool]$online
+        [string]$adminPassword,
+
+        [bool]$online,
+
+        [switch]$enableDSCReboot
     )
 
     # Load Hyper-V module
@@ -77,6 +66,7 @@ function DeployVM {
     Resize-VHD -Path $vmVHDPath -SizeBytes $diskSize -ErrorAction Stop
         
     # Temporarily disable Bitlocker force on data drives
+    $bitlockerKeyPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\Microsoft\FVE"
     $isFveEnabled = (Get-ItemPropertyValue -Path $bitlockerKeyPath -Name FDVDenyWriteAccess -ErrorAction SilentlyContinue) -eq 1
     if ($isFveEnabled) {
         SetItemProperty -path $bitlockerKeyPath -name FDVDenyWriteAccess -type "DWord" -value 0
@@ -99,6 +89,9 @@ function DeployVM {
     Write-Host "Expanding $($drive.Root) to $($maxSizeRounded / 1GB) GB"
     Resize-Partition -DriveLetter $($drive.Name) -Size $maxSizeRounded -ErrorAction Stop
 
+    $encryptedPasswordBytes = [System.Text.Encoding]::Unicode.GetBytes("$($adminPassword)AdministratorPassword")
+    $encryptedPassword = [System.Convert]::ToBase64String($encryptedPasswordBytes)
+
     # Generate Answerfile and copy to .vhdx
     $answerFile = @"
 <?xml version="1.0"?>
@@ -116,7 +109,7 @@ function DeployVM {
             <RegisteredOrganization>$organization</RegisteredOrganization>
             <UserAccounts>
                 <AdministratorPassword>
-                    <Value>UABhAHMAcwB3ADAAcgBkAEEAZABtAGkAbgBpAHMAdAByAGEAdABvAHIAUABhAHMAcwB3AG8AcgBkAAAA</Value>
+                    <Value>$encryptedPassword</Value>
                     <PlainText>false</PlainText>
                 </AdministratorPassword>
             </UserAccounts>
@@ -158,9 +151,33 @@ function DeployVM {
     # Copy modules to .vhdx
     Write-Host "Copying modules"
     $psModules | ? { $null -ne $_ } | % {
-        Write-Host "Copying $([System.IO.Path]::Combine($_.ModuleBase, $_.Name, $_.RequiredVersion)) to $([System.IO.Path]::Combine(($drive.Root), "Program Files\WindowsPowerShell\Modules", $_.Name, $_.RequiredVersion))"
-        Copy-Item -Path ([System.IO.Path]::Combine($_.ModuleBase, $_.Name, $_.RequiredVersion)) `
-            -Destination ([System.IO.Path]::Combine(($drive.Root), "Program Files\WindowsPowerShell\Modules", $_.Name, $_.RequiredVersion)) `
+        $moduleSpec = [Microsoft.PowerShell.Commands.ModuleSpecification]::new(@{
+            ModuleName      = $_.Name
+            RequiredVersion = $_.RequiredVersion.ToString()
+        })
+        $localModule = Get-Module -ListAvailable -FullyQualifiedName $moduleSpec | select -First 1
+        if ($null -eq $localModule) {
+            Write-Host "Module `"$($_.Name)`" was not found!" -ForegroundColor Red
+            continue
+        }
+        
+        $moduleSourceDir = $null
+        foreach ($modulePath in ($env:PSModulePath -split ";")) {
+            if ($null -eq $moduleSourceDir -and $localModule.Path.ToUpper().Contains($modulePath.ToUpper())) {
+                $moduleRelativePath = $localModule.Path.ToUpper().Replace($modulePath.ToUpper() + "\", "")
+                $moduleFolderName = $localModule.Path.Substring($modulePath.Length + 1, $moduleRelativePath.IndexOf("\"))
+                $moduleSourceDir = [System.IO.Path]::Combine($modulePath, $moduleFolderName)
+            }
+        }
+        if ([String]::IsNullOrWhiteSpace($moduleSourceDir)) {
+            Write-Host "Module `"$($_.Name)`" was not found!"
+            continue
+        }
+
+        $destination = [System.IO.Path]::Combine($drive.Root, "Program Files\WindowsPowerShell\Modules", $moduleFolderName)
+        Write-Host "Copying `"$($moduleSourceDir)`" to `"$($destination)`""
+        Copy-Item -Path $moduleSourceDir `
+            -Destination $destination `
             -Recurse -Force -ErrorAction Stop | Out-Null
     }
 

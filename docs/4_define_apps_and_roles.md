@@ -69,13 +69,11 @@ Example for Role "SQL":
         DscModules   = @(
             [PsModule]@{
                 Name            = "SqlServer"
-                ModuleBase      = "$($global:root)\modules"
                 RequiredVersion = [Version]::new(21, 1, 18068)
             },
             [PsModule]@{
                 Name            = "SqlServerDSC"
                 RequiredVersion = [Version]::new(11, 0, 0 , 0)
-                ModuleBase      = "$($global:root)\modules"
             }
         )
         Files = @(

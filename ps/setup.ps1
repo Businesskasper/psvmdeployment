@@ -209,3 +209,16 @@ finally {
 if ($hyperVSetup.RestartNeeded) {
     Write-Host "Please Reboot" -ForegroundColor Yellow
 }
+
+Write-Host "Install shipped DSC modules...   " -NoNewline
+try {
+    $modules = Get-ChildItem -Path "$($root)\modules" | ? {$_.Attributes -eq [System.IO.FileAttributes]::Directory }
+    $modules | % { Copy-Item -Path $_.FullName -Container -Destination "$($env:ProgramFiles)\WindowsPowerShell\Modules" -Force -Recurse | Out-Null}
+
+    Write-Host $([char]0x221A) -ForegroundColor Green
+}
+catch [Exception] {
+    Write-Host $([char]0x0078)
+    Write-Host "Something went wrong:`n$($_.Exception.Message)"
+    break
+}

@@ -55,32 +55,19 @@ class PsModule {
     [ValidateNotNullOrEmpty()]
     [Version] $RequiredVersion
 
-    [ValidateNotNullOrEmpty()]
-    [string] $ModuleBase
-
-
     [void] Validate() {
 
         $spec = [Microsoft.PowerShell.Commands.ModuleSpecification]::new(@{
                 ModuleName      = $this.Name
                 RequiredVersion = $this.RequiredVersion.ToString()
             })
-
-        if (-not (Get-Module -ListAvailable -FullyQualifiedName $spec)) {
+        $localModule = Get-Module -ListAvailable -FullyQualifiedName $spec | select -First 1
+        if ($null -eq $localModule) {
             #Module not installed
             Write-Host -Object "Module `"$($this.Name)`" was not found!"
-
-            if (Test-Path ([System.IO.Path]::Combine($this.ModuleBase, $this.Name, $this.RequiredVersion.ToString()))) {
-                #Copy it from specified Path
-                Write-Host "Copying from $($this.ModuleBase)"
-                Copy-Item -Path ([System.IO.Path]::Combine($this.ModuleBase, $this.Name, $this.RequiredVersion.ToString())) -Destination ([System.IO.Path]::Combine("C:\Program Files\WindowsPowerShell\Modules\" , $this.Name, $this.RequiredVersion.ToString())) -ErrorAction Stop -Force -Recurse
-            }
-            else {
-                Write-Host "Downloading.."
-                $module = Find-Module -Name $this.Name -RequiredVersion $this.RequiredVersion -ErrorAction Stop
-                $module | Save-Module -Path $this.ModuleBase -Force
-                $module | Install-Module -Force 
-            }
+            Write-Host "Downloading.."
+            $module = Find-Module -Name $this.Name -RequiredVersion $this.RequiredVersion -ErrorAction Stop
+            $module | Install-Module -Force 
         }
     }
 }
@@ -112,7 +99,7 @@ class NodeRole {
         } 
     }
 
-    [hashtable[]] GetFiles() {
+    [Binary[]] GetFiles() {
         $allFiles = @()
 
         foreach ($app in $this.Applications) {

@@ -144,7 +144,7 @@
 
         SqlSetup SQL2019 {
             Action              = 'Install'
-            SourcePath          = 'C:\Sources\SQL\Microsoft_SQL_Server_2019_Developer'
+            SourcePath          = 'C:\Sources\Software\Microsoft_SQL_Server_2019_Developer'
             Features            = 'SQLEngine'
             SQLCollation        = 'Latin1_General_100_CS_AS'
             InstanceName        = "SQL2019"
@@ -185,7 +185,7 @@
             }
         }
 
-        xReboot DomainReboot {
+        xReboot SqlReboot {
             Key = "SQL"
         }
     } 
@@ -244,7 +244,7 @@
             TestPath   = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9EACB46-9179-3C2D-A196-62006713EC8E}'
         }
 
-        xReboot DomainReboot {
+        xReboot DevReboot {
             Key = "DEV"
         }
     }

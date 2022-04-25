@@ -1,21 +1,9 @@
-if ($psISE) {
-    $root = $psISE.CurrentFile | select -ExpandProperty FullPath | Split-Path -Parent
-}
-else {
-    if ($profile -match "VSCode") {
-        $root = $psEditor.GetEditorContext().CurrentFile.Path | Split-Path -Parent
-    }
-    else {
-        $root = $MyInvocation.MyCommand.Definition | Split-Path -Parent
-    }
-}
-
-. "$($root)\functions\deleteItem.ps1"
-. "$($root)\functions\ensurePath.ps1"
-. "$($root)\functions\setItemProperty.ps1"
-. "$($root)\functions\deployVM.ps1"
-. "$($root)\functions\newVMNic.ps1"
-. "$($root)\functions\showVMLog.ps1"
-. "$($root)\functions\getNicTask.ps1"
-. "$($root)\functions\getLatestUpdate.ps1"
-. "$($root)\functions\downloadSDelete.ps1"
+. "$($global:root)\ps\functions\deleteItem.ps1"
+. "$($global:root)\ps\functions\ensurePath.ps1"
+. "$($global:root)\ps\functions\setItemProperty.ps1"
+. "$($global:root)\ps\functions\deployVM.ps1"
+. "$($global:root)\ps\functions\ensureVMNic.ps1"
+. "$($global:root)\ps\functions\showVMLog.ps1"
+. "$($global:root)\ps\functions\getNicTask.ps1"
+. "$($global:root)\ps\functions\getLatestUpdate.ps1"
+. "$($global:root)\ps\functions\downloadSDelete.ps1"

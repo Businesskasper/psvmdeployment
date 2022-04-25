@@ -43,9 +43,12 @@ function ShowVMLog ([string]$vmName, [PSCredential]$cred) {
             VirtualizingPanel.IsVirtualizing="True"
         >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="TimeCreated"
+                <DataGridTextColumn Header="Time Created"
                     Binding="{Binding TimeCreated}" 
                     SortDirection="Descending"
+                />
+                <DataGridTextColumn Header="Log Level"
+                    Binding="{Binding LevelDisplayName}"
                 />
                 <DataGridTextColumn Header="Message"
                     Binding="{Binding Message}"
@@ -96,27 +99,40 @@ function ShowVMLog ([string]$vmName, [PSCredential]$cred) {
                     return $null
                 }
 
+                <#
+                $syncHash.eventsDataGrid.LoadingRow = [action]{
+                    param (
+                        [object]$sender,
+                        [System.Windows.Controls.DataGridRowEventArgs]$e
+                    )
+
+                    $e | Out-File c:\asdf.txt -Append
+                }
+                #>
+
                 while ($true) {   
 
                     $reachable = $false
-                    
                     try {
                         $events = Invoke-Command -VMName $vmName -Credential $credentials `
-                            -ScriptBlock { Get-WinEvent -LogName microsoft-windows-dsc/analytic -Oldest | select TimeCreated, Message | sort TimeCreated -Descending } -ErrorAction Stop 
+                            -ScriptBlock { Get-WinEvent -LogName microsoft-windows-dsc/analytic -Oldest | select TimeCreated, Message, RecordId, LevelDisplayName | sort TimeCreated -Descending } -ErrorAction Stop 
 
                         $syncHash.Window.Dispatcher.invoke([action] { 
+                            
                             $scrollViewer = GetScrollViewer -parentElement ([System.Windows.UIElement]$syncHash.eventsDataGrid)
+                            
                             if ($null -ne $scrollViewer) {
                                 $offset = $scrollViewer.VerticalOffset
                             }
+                            
                             $selectedItem = $syncHash.eventsDataGrid.SelectedItem
                             if ($null -ne $selectedItem) {
                                 $selectedItemId = $selectedItem.RecordId
                             }
-
-                            $syncHash.dataGrid1.ItemsSource = $events
+                            
+                            $syncHash.eventsDataGrid.ItemsSource = $events
                             $syncHash.lbl_WaitingForMachine.Visibility = 'Hidden' 
-
+                            
                             if ($null -ne $selectedItemId) {
                                 $itemToFocus = $syncHash.eventsDataGrid.ItemsSource.Where({$_.RecordId -eq $selectedItemId}) | select -First 1
                                 $syncHash.eventsDataGrid.SelectedItem = $itemToFocus
@@ -127,16 +143,16 @@ function ShowVMLog ([string]$vmName, [PSCredential]$cred) {
                             if ($null -ne $scrollViewer -and $null -ne $offset) {
                                 $scrollViewer.ScrollToVerticalOffset($offset)
                             }
+                            
                         })
                         $reachable = $true
-
                     }
                     catch [Exception] {
                         $syncHash.Window.Dispatcher.invoke([action] {                         
                             $syncHash.lbl_WaitingForMachine.Visibility = 'Visible' 
                             $syncHash.ellipse_Status.Fill = 'Red'
                         })
-                        start-sleep -seconds 5
+                        start-sleep -seconds 2
                     }
 
                     if ($reachable -eq $true) {
@@ -192,3 +208,6 @@ function ShowVMLog ([string]$vmName, [PSCredential]$cred) {
 
     return $parentPSInstance.BeginInvoke()
 }
+
+
+#ShowVMLog -vmName Demo -cred ([PSCredential]::new(".\Administrator", (ConvertTo-SecureString -AsPlainText -String "Passw0rd" -Force)))

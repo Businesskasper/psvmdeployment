@@ -100,37 +100,30 @@ $NodeRoles = @{
             [PsModule]@{
                 Name            = "ComputerManagementDsc" 
                 RequiredVersion = [Version]::new(6, 3, 0, 0)
-                ModuleBase      = "$($global:root)\modules"
             },
             [PsModule]@{
                 Name            = "xInstallExe" 
                 RequiredVersion = [Version]::new(1, 2)
-                ModuleBase      = "$($global:root)\modules"
             },
             [PsModule]@{
                 Name            = "xWinEventLog" 
                 RequiredVersion = [Version]::new(1, 2, 0, 0)
-                ModuleBase      = "$($global:root)\modules"
             },
             [PsModule]@{
                 Name            = "xDSCHelper" 
-                RequiredVersion = [Version]::new(1, 0)
-                ModuleBase      = "$($global:root)\modules"
+                RequiredVersion = [Version]::new(1, 2)
             },
             [PsModule]@{
                 Name            = "xRemoteDesktopAdmin" 
                 RequiredVersion = [Version]::new(1, 1, 0, 0)
-                ModuleBase      = "$($global:root)\modules"
             },
             [PsModule]@{
                 Name            = "xNetworking" 
                 RequiredVersion = [Version]::new(5, 5, 0, 0)
-                ModuleBase      = "$($global:root)\modules"
             },
             [PsModule]@{
                 Name            = "xActiveDirectory"
                 RequiredVersion = [Version]::new(2, 22, 0, 0)
-                ModuleBase      = "$($global:root)\modules"
             }
         )
         Files      = @()
@@ -142,17 +135,14 @@ $NodeRoles = @{
             [PsModule]@{
                 Name            = "xActiveDirectory" 
                 RequiredVersion = [Version]::new(2, 22, 0, 0)
-                ModuleBase      = "$($global:root)\modules"
             },
             [PsModule]@{
                 Name            = "xDhcpServer" 
                 RequiredVersion = [Version]::new(1, 6, 0, 0)
-                ModuleBase      = "$($global:root)\modules"
             },
             [PsModule]@{
                 Name            = "xDnsServer" 
                 RequiredVersion = [Version]::new(1, 11, 0, 0)
-                ModuleBase      = "$($global:root)\modules"
             }
         )
     }
@@ -161,13 +151,11 @@ $NodeRoles = @{
         DscModules   = @(
             [PsModule]@{
                 Name            = "SqlServer"
-                ModuleBase      = "$($global:root)\modules"
                 RequiredVersion = [Version]::new(21, 1, 18068)
             },
             [PsModule]@{
                 Name            = "SqlServerDSC"
                 RequiredVersion = [Version]::new(11, 0, 0 , 0)
-                ModuleBase      = "$($global:root)\modules"
             }
         )
         Files = @(
@@ -219,7 +207,6 @@ $NodeRoles = @{
             [PsModule]@{
                 Name            = "xNodeJS"
                 RequiredVersion = "1.0"
-                ModuleBase      = "$($global:root)\modules"
             }
         )
     }
@@ -243,4 +230,3 @@ foreach ($appName in $Applications.Keys) {
         Write-Host "Validation for $($Applications[$appName].Name) failed: $($_.Exception.Message)" -ForegroundColor Red
     }
 }
-

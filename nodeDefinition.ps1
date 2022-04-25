@@ -9,14 +9,22 @@
             RebootNodeIfNeeded          = $true
         },
         @{
-            NodeName     = "Dev"
+            NodeName     = "Demo"
             Roles        = @($NodeRoles.VM, $NodeRoles.SQL, $NodeRoles.DEV)
             VhdxPath     = "$($global:root)\Sources\Images\en_windows_server_2019_updated_nov_2020_x64_dvd_8600b05f.vhdx"
             OSType       = 'Standard'
-            RAM          = 8192MB
-            DiskSize     = 120GB
-            Cores        = 4
-            Online       = $true
+            RAM          = 4096MB
+            DiskSize     = 60GB
+            Cores        = 2
+            NICs         = @(
+                @{
+                    SwitchName = "Extern LAN"
+                    SwitchType = "External"
+                    nic        = "Ethernet 3"
+                    DHCP       = $true
+                }
+            )
+            Online       = $false
         }
     )
 }

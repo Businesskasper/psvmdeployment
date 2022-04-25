@@ -173,13 +173,14 @@ class xReboot {
     }
 
     [bool] Test() {
-        return $(Test-Path HKLM:\SOFTWARE\DSC\RebootDomain)
+        return $(Test-Path "HKLM:\SOFTWARE\DSC\$($this.Key)")
     }
 
     [xReboot] Get() {
         return $this
     }
 }
+
 function Write-InformationLog([string]$source, [System.Diagnostics.EventLogEntryType]$entryType, [string]$message) {
     New-EventLog –LogName Application –Source $source -ErrorAction SilentlyContinue
     Write-EventLog -LogName Application -Source $source -EntryType $entryType -EventId 1337 -Message $message
