@@ -77,8 +77,6 @@ class NodeRole {
     [ValidateNotNullOrEmpty()]    
     [string] $Name
 
-    [Application[]] $Applications
-
     [PsModule[]] $DscModules
 
     [Binary[]] $Files
@@ -101,10 +99,6 @@ class NodeRole {
 
     [Binary[]] GetFiles() {
         $allFiles = @()
-
-        foreach ($app in $this.Applications) {
-            $allFiles += $app.SourcePath
-        }
 
         foreach ($file in $this.Files) {
             $allFiles += $file

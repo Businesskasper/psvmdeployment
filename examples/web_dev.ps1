@@ -1,4 +1,4 @@
-﻿return @{
+return @{
     AllNodes = @(
         @{
             NodeName                    = "*"
@@ -10,7 +10,8 @@
         },
         @{
             NodeName     = "Demo"
-            Roles        = @($NodeRoles.VM, $NodeRoles.Dev)
+            Roles        = @($NodeRoles.VM)
+            Applications = @($Applications.GoogleChrome, $Applications.VSCode, $Applications.NodeJSLatestStable, $Applications.Git)
             VhdxPath     = "$($global:root)\Sources\Images\en_windows_server_2019_updated_nov_2020_x64_dvd_8600b05f.vhdx"
             OSType       = 'Standard'
             RAM          = 8192MB

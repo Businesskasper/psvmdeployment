@@ -130,7 +130,6 @@ $NodeRoles = @{
     }
     DC  = [NodeRole]@{
         Name         = "DC"
-        Applications = @()
         DscModules   = @(
             [PsModule]@{
                 Name            = "xActiveDirectory" 
@@ -168,7 +167,6 @@ $NodeRoles = @{
                 Destination = "C:\Sources\Software\Microsoft_SSMS\"
             }
         )
-        Applications = @()
     }
     DEV = [NodeRole]@{
         Name         = "DEV"
@@ -202,7 +200,6 @@ $NodeRoles = @{
                 Destination = "C:\Sources\Software\Microsoft_SQL_Server_2019_Developer\"
             }
         )
-        Applications = @()
         DscModules   = @(
             [PsModule]@{
                 Name            = "xNodeJS"
