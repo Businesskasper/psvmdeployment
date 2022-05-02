@@ -125,15 +125,10 @@ class xVmNetConfig {
     [bool] Test() {        
         $adapter = Get-NetAdapterAdvancedProperty -DisplayName "Hyper-V Network Adapter Name" | ? { $_.DisplayValue -eq $this.NicName } | select -ExpandProperty Name
 
-        if (($this.DHCP -and ((Get-NetIPInterface -InterfaceAlias $adapter).Dhcp -eq "Enabled")) -or `
-        ((Get-NetIPAddress -InterfaceAlias $adapter -AddressFamily IPv4 | select -ExpandProperty IPAddress) -eq $this.IPAddress -and `
+        return (($this.DHCP -and ((Get-NetIPInterface -InterfaceAlias $adapter).Dhcp -eq "Enabled")) -or `
+            ((Get-NetIPAddress -InterfaceAlias $adapter -AddressFamily IPv4 | select -ExpandProperty IPAddress) -eq $this.IPAddress -and `
             (Get-NetIPAddress -InterfaceAlias $adapter -AddressFamily IPv4 | select -ExpandProperty PrefixLength) -eq $this.PrefixLength -and `
-            (Get-DnsClientServerAddress -InterfaceAlias $adapter -AddressFamily IPv4 | select -ExpandProperty ServerAddresses) -contains $this.DNSAddress)) {
-            return $true
-        }
-        else {
-            return $false
-        }
+            (Get-DnsClientServerAddress -InterfaceAlias $adapter -AddressFamily IPv4 | select -ExpandProperty ServerAddresses) -contains $this.DNSAddress)) 
     }    
     
     [xVmNetConfig] Get() {        

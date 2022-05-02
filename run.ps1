@@ -39,7 +39,7 @@ foreach ($node in $nodeDefinition.AllNodes) {
     Write-Host "Deploying `"$($node.NodeName)`""        
         
     # Create NICs if necessary
-    $node.NICs | % { 
+    $node.NICs | ? { $null -ne $_ } | % { 
         EnsureVMNic -name $_.SwitchName -type $_.SwitchType -nic $_.NIC
     }
 
@@ -49,23 +49,23 @@ foreach ($node in $nodeDefinition.AllNodes) {
     $node.Applications | % { $files += $_.SourcePath }
     $vm = DeployVM -vmName $node.NodeName `
         -vhdxFile $node.VhdxPath `
-        -organization $node.DomainName `
+        -organization $nodeDefinition.NodeDefaults.DomainName `
         -dscFile ($dscFiles | ? { $_.BaseName -eq $node.NodeName } | select -first 1 -expandProperty FullName) `
         -enableDSCReboot `
         -files $files `
         -ram $node.RAM `
         -diskSize $node.DiskSize `
         -cores $node.Cores `
-        -systemLocale $node.SystemLocale `
+        -systemLocale $nodeDefinition.NodeDefaults.SystemLocale `
         -nics $node.NICs `
         -online ($node.Online -eq $true) `
-        -adminPassword $node.LocalCredentials.GetNetworkCredential().Password `
+        -adminPassword $nodeDefinition.NodeDefaults.LocalCredentials.GetNetworkCredential().Password `
         -psModules $node.Roles.DscModules
 
     Start-VM -VM $vm | Out-Null
 
     # Query the DSC event log of the node
-    $logJobs += ShowVMLog -vmName $node.NodeName -cred $node.LocalCredentials
+    $logJobs += ShowVMLog -vmName $node.NodeName -cred $nodeDefinition.NodeDefaults.LocalCredentials
 }
 
 

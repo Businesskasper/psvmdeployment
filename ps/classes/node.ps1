@@ -51,6 +51,7 @@ class Node : NodeBase {
     [Int64]$DiskSize
     [int]$Cores
     [boolean]$JoinDomain
+    [boolean]$Online
 
 
     [hashtable] ToNodeHash() {
