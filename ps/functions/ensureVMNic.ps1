@@ -1,5 +1,4 @@
 function EnsureVMNic ([string]$name, [Microsoft.HyperV.PowerShell.VMSwitchType]$type, [string]$nic) {
-    
     try {
         Import-Module Hyper-V -ErrorAction Stop | Out-Null
     }

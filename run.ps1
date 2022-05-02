@@ -17,7 +17,8 @@ else {
 
 # Load and compile the DSC node definition and playbook
 Write-Host "Creating DSC configuration files"
-$configData = . $global:root\nodeDefinition.ps1
+$nodeDefinition = . $global:root\nodeDefinition.ps1
+$configData = $nodeDefinition.ToConfigData()
 . $global:root\playbook.ps1
 
 # Create configuration files for each node
@@ -28,17 +29,17 @@ DeleteItem -path "$configDir\*.*"
 
 # Deploy nodes
 $logJobs = @()
-foreach ($node in $configData.AllNodes) {
+foreach ($node in $nodeDefinition.AllNodes) {
     $existingNode = Get-VM -Name $($node.NodeName) -ErrorAction SilentlyContinue
     if ($null -ne $existingNode) {  
         Write-Host "$($node.NodeName) ist schon vorhanden. Überpringe.."
         continue
     }
 
-    Write-Host "Deploying $($node.NodeName)"        
+    Write-Host "Deploying `"$($node.NodeName)`""        
         
     # Create NICs if necessary
-    $node.NICS | ? { $_ -ne $null } | % { 
+    $node.NICs | % { 
         EnsureVMNic -name $_.SwitchName -type $_.SwitchType -nic $_.NIC
     }
 
@@ -56,7 +57,7 @@ foreach ($node in $configData.AllNodes) {
         -diskSize $node.DiskSize `
         -cores $node.Cores `
         -systemLocale $node.SystemLocale `
-        -nics $node.NICS `
+        -nics $node.NICs `
         -online ($node.Online -eq $true) `
         -adminPassword $node.LocalCredentials.GetNetworkCredential().Password `
         -psModules $node.Roles.DscModules

@@ -23,7 +23,7 @@
         }
 
         # Network configuration
-        foreach ($nic in $node.NICS | ? { $_.IPAddress }) {
+        foreach ($nic in $node.NICs | ? { $_.IPAddress }) {
             xVmNetConfig $nic.SwitchName {
                 NicName      = $nic.SwitchName
                 IPAddress    = $nic.IPAddress

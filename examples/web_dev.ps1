@@ -1,14 +1,10 @@
-return @{
+return [NodeConfiguration]@{
+    NodeDefaults = [NodeDefaults]@{
+        LocalCredentials = [PSCredential]::new(".\Administrator", (ConvertTo-SecureString -AsPlainText -Force -String "Passw0rd"))
+        SystemLocale     = "de-DE"
+    }
     AllNodes = @(
-        @{
-            NodeName                    = "*"
-            LocalCredentials            = [System.Management.Automation.PSCredential]::new(".\Administrator", (ConvertTo-SecureString "Passw0rd" -AsPlainText -Force))
-            SystemLocale                = "de-DE"
-            PSDscAllowPlainTextPassword = $true
-            PSDscAllowDomainUser        = $true
-            RebootNodeIfNeeded          = $true
-        },
-        @{
+        [Node]@{
             NodeName     = "Demo"
             Roles        = @($NodeRoles.VM)
             Applications = @($Applications.GoogleChrome, $Applications.VSCode, $Applications.NodeJSLatestStable, $Applications.Git)
@@ -18,13 +14,12 @@ return @{
             DiskSize     = 60GB
             Cores        = 4
             NICs         = @(
-                @{
+                [ExternalNic]@{
                     SwitchName = "Extern LAN"
-                    SwitchType = "External"
-                    nic        = "Ethernet 3"
+                    Nic        = "Ethernet 3"
                     DHCP       = $true
                 }
-            )
+            )           
         }
     )
 }
