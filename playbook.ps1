@@ -67,7 +67,7 @@
             Computer JoinDomain {
                 Name       = $node.NodeName
                 DomainName = $node.DomainName
-                Credential = $node.DomainJoinCredentials
+                Credential = $node.DomainCredentials
                 DependsOn  = '[xWaitForADDomain]WaitForDomain'
             }   
         }

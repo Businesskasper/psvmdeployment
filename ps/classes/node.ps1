@@ -41,6 +41,7 @@ class NodeDefaults : NodeBase {
 
 class Node : NodeBase {
     [string]$NodeName
+    #[Nullable[PSCredential]]$LocalCredentials
     [PSCredential]$LocalCredentials
     [NodeRole[]]$Roles
     [Nic[]]$NICs
@@ -54,11 +55,18 @@ class Node : NodeBase {
     [boolean]$Online
 
 
-    [hashtable] ToNodeHash() {
+    [hashtable] ToNodeHash([NodeDefaults]$nodeDefaults) {
         $nodeAsHash = [Hashtable]@{}
         $props = $this.GetType().GetProperties()
         foreach ($prop in $props) {
-            $nodeAsHash[$prop.Name] = $prop.GetValue($this)
+            $nodeValue = $prop.GetValue($this)
+            $defaultValue = $nodeDefaults.$($prop.Name)
+            if ($null -eq $nodeValue -and $null -ne $defaultValue) {
+                $nodeAsHash[$prop.Name] = $defaultValue
+            }
+            else {
+                $nodeAsHash[$prop.Name] = $nodeValue
+            }
         }
         return $nodeAsHash
     }
@@ -83,7 +91,7 @@ class NodeConfiguration {
         }
 
         foreach ($node in $this.AllNodes) {
-            $configData["AllNodes"] += $node.ToNodeHash()
+            $configData["AllNodes"] += $node.ToNodeHash($this.NodeDefaults)
         }
 
         return $configData
