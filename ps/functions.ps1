@@ -22,3 +22,4 @@ else {
 . "$($scriptRoot)\functions\getNicTask.ps1"
 . "$($scriptRoot)\functions\getLatestUpdate.ps1"
 . "$($scriptRoot)\functions\downloadSDelete.ps1"
+. "$($scriptRoot)\functions\getImageIndex.ps1"

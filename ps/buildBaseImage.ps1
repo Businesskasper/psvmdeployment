@@ -1,11 +1,11 @@
 ﻿[CmdletBinding(DefaultParametersetName='None')] 
 param(
     [Parameter(Mandatory=$true)]
-    [string]$isoPath = 'C:\Hyper-V\psvmdeployment\sources\Images\en_windows_server_2019_updated_nov_2020_x64_dvd_8600b05f.iso',
+    [string]$isoPath = 'C:\Hyper-V\psvmdeployment\sources\Images\20348.169.210806-2348.fe_release_svc_refresh_SERVER_EVAL_x64FRE_en-us.iso',
 
     [Parameter(Mandatory=$true)]
-    [ValidateSet('Standard', 'Datacenter', 'Standard (Desktop Experience)')]
-    [string]$SKU = 'Standard (Desktop Experience)',
+    [ValidateSet('Standard', 'Standard Desktop')]
+    [string]$SKU = 'Standard Desktop',
 
     [Parameter(ParameterSetName="Update")]
     [Switch]$InstallLatestCU,
@@ -15,7 +15,7 @@ param(
     [string]$Product = 'Windows Server',
 
     [Parameter(ParameterSetName="Update", Mandatory=$true)]
-    [string]$Version = '2019'  
+    [string]$Version = '22H2'  
 )
 
 if (-not [String]::IsNullOrWhitespace($PSScriptRoot)) {
@@ -63,8 +63,8 @@ if ($InstallLatestCU.IsPresent) {
     #Bug in kbupdate module
     Write-Host "Get latest cumulative update"
     $latestUpdate = GetLatestUpdate -Product $product -Version $version
-    Write-Host "Download `"$($latestUpdate)`""
-    $updatePath = Get-KbUpdate -Name $latestUpdate | ? { $_.Title -like "*Cumulative Update for $($product)*$($version) for x64-based Systems (K*" } | Save-KbUpdate -Path $workingDir | select -ExpandProperty FullName
+    Write-Host "Download `"$($latestUpdate.kb)`""
+    $updatePath = Get-KbUpdate -Name $latestUpdate.kb | ? { $_.Title -eq $latestUpdate.title} | Save-KbUpdate -Path $workingDir | select -ExpandProperty FullName
 }
 
 
@@ -81,7 +81,7 @@ Write-Host "Create VHDX"
 $isoLength = (Get-Item -Path $isoPath | select -ExpandProperty Length) / 1GB
 $vhdxInitialSize = ([Math]::Round($isoLength, 0) * 3) * 1GB
 
-$vhdxPath = ([System.IO.Path]::Combine($workingDir, (Split-Path -Path $isoPath -Leaf).Split(".")[0]) + ".vhdx")
+$vhdxPath = ([System.IO.Path]::Combine($workingDir, (Split-Path -Path $isoPath -Leaf).Replace(".iso", ".vhdx")))
 if (Test-Path -Path $vhdxPath) {
     Remove-Item -Path $vhdxPath -Force
 }
@@ -108,7 +108,7 @@ $windowsDrive = $osPartition.AccessPaths[0].substring(0, 2)
 
 Write-Host "Apply WIM to VHDX"
 $wimPath = [System.IO.Path]::Combine($isoDriveLetter, "sources", "install.wim")
-$imageIndex = Get-WindowsImage -ImagePath $wimPath | ? { $_.ImageName -like "*$($SKU)" } | select -ExpandProperty ImageIndex
+$imageIndex = GetImageIndex -imagePath $wimPath -sku $SKU
 Expand-WindowsImage -ImagePath $wimPath -ApplyPath "$($osPartition.DriveLetter):" -Index $imageIndex | Out-Null
 
 Write-Host "Make .vhdx bootable"
@@ -124,6 +124,7 @@ Start-Process -FilePath "C:\windows\system32\bcdboot.exe" -ArgumentList $bcdBoot
 Write-Host "Add .Net Framework 3.5"
 Enable-WindowsOptionalFeature -FeatureName NetFx3 -Path "$($osPartition.DriveLetter):"  -Source ([System.IO.Path]::Combine($isoDriveLetter, "sources", "sxs"))  -All -NoRestart | Out-Null
 
+# Hier
 if (-not ([String]::IsNullOrWhitespace($updatePath))) {
     Write-Host "Apply latest patch"
     Add-WindowsPackage -PackagePath $updatePath -Path "$($osPartition.DriveLetter):" -PreventPending -LogPath "$($workingDir)\dism.log" -LogLevel Debug | Out-Null
