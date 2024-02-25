@@ -115,7 +115,9 @@ function ShowVMLog ([string]$vmName, [PSCredential]$cred) {
                     $reachable = $false
                     try {
                         $events = Invoke-Command -VMName $vmName -Credential $credentials `
-                            -ScriptBlock { Get-WinEvent -LogName microsoft-windows-dsc/analytic -Oldest | select TimeCreated, Message, RecordId, LevelDisplayName | sort TimeCreated -Descending } -ErrorAction Stop 
+                            -ScriptBlock { 
+                                Get-WinEvent -LogName microsoft-windows-dsc/analytic -Oldest -ErrorAction SilentlyContinue | select TimeCreated, Message, RecordId, LevelDisplayName | sort TimeCreated -Descending 
+                            } -ErrorAction Stop 
 
                         $syncHash.Window.Dispatcher.invoke([action] { 
                             

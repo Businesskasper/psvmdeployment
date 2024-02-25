@@ -15,8 +15,8 @@ return [NodeConfiguration]@{
             Cores        = 4
             NICs         = @(
                 [ExternalNic]@{
-                    SwitchName = "Extern LAN"
-                    Nic        = "Ethernet 3"
+                    SwitchName = "Extern WLAN"
+                    Nic        = "WLAN"
                     DHCP       = $true
                 }
             )           
