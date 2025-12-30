@@ -62,7 +62,7 @@ if ($InstallLatestCU.IsPresent) {
 
     #Bug in kbupdate module
     Write-Host "Get latest cumulative update"
-    $latestUpdate = GetLatestUpdate -Product $product -Version $version
+    $latestUpdate = GetLatestUpdate -Product $Product -Version $Version
     Write-Host "Download `"$($latestUpdate.kb)`""
     $updatePath = Get-KbUpdate -Name $latestUpdate.kb | ? { $_.Title -eq $latestUpdate.title} | Save-KbUpdate -Path $workingDir | select -ExpandProperty FullName
 }
